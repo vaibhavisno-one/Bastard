@@ -216,3 +216,77 @@ const calculatePurchaseQuantity = inventory => {
     return 50;
   }
 };
+
+// FINAL VERSION - redirects to payment instead of order success
+export const placeOrderWithPayment = () => {
+  return async (dispatch, getState) => {
+    try {
+      const { cart, address } = getState();
+      
+      // Debug address state
+      console.log('Address state:', address);
+      
+      if (!cart.cartId) {
+        await dispatch(getCartId());
+      }
+      
+      // Better address validation
+      let selectedAddress = null;
+      
+      if (address.address && address.address._id) {
+        selectedAddress = address.address;
+      } else if (address.addresses && address.addresses.length > 0) {
+        // Use first available address
+        selectedAddress = address.addresses[0];
+      }
+      
+      // Show specific error if no address
+      if (!selectedAddress || !selectedAddress._id) {
+        const errorOptions = {
+          title: 'Address Required',
+          message: 'Please add a delivery address before placing the order. Go to Account > Addresses to add one.',
+          position: 'tr',
+          autoDismiss: 5
+        };
+        dispatch(success(errorOptions));
+        return;
+      }
+      
+      console.log('Using address:', selectedAddress);
+      
+      const orderData = {
+        cartId: cart.cartId,
+        total: cart.cartTotal,
+        addressId: selectedAddress._id
+      };
+      
+      console.log('Creating order with:', orderData);
+      
+      const response = await axios.post(`${API_URL}/order/add`, orderData);
+      
+      if (response.data.success) {
+        const order = response.data.order;
+        
+        dispatch(clearCart());
+        dispatch(toggleCart());
+        
+        dispatch(push({
+          pathname: '/payment',
+          state: { order }
+        }));
+      }
+    } catch (error) {
+      console.error('Order creation failed:', error);
+      
+      // Show more specific error message
+      const errorMsg = error.response?.data?.error || 'Order creation failed';
+      const errorOptions = {
+        title: 'Order Failed',
+        message: errorMsg,
+        position: 'tr',
+        autoDismiss: 5
+      };
+      dispatch(success(errorOptions));
+    }
+  };
+};
