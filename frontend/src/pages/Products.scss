@@ -1,0 +1,214 @@
+.products-page {
+  padding: 3rem 2rem;
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #333;
+    text-align: center;
+  }
+
+  .products-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+
+    .filters {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      height: fit-content;
+      position: sticky;
+      top: 90px;
+      animation: fadeIn 0.5s ease-out;
+
+      h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+      }
+
+      .filter-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+          color: #555;
+        }
+
+        select, input {
+          width: 100%;
+          padding: 0.8rem;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+
+          &:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          }
+        }
+
+        .price-inputs {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          input {
+            flex: 1;
+          }
+
+          span {
+            color: #999;
+          }
+        }
+      }
+
+      .clear-filters {
+        width: 100%;
+        padding: 0.8rem;
+        background: #ff6b6b;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: #ff5252;
+          transform: translateY(-2px);
+        }
+      }
+    }
+
+    .products-content {
+      .loading, .no-products {
+        text-align: center;
+        padding: 3rem;
+        font-size: 1.2rem;
+        color: #666;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+
+        .product-card {
+          background: #fff;
+          border-radius: 15px;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          text-decoration: none;
+          color: inherit;
+          transition: all 0.3s ease;
+          animation: fadeInUp 0.6s ease-out;
+
+          &:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          }
+
+          .product-image {
+            width: 100%;
+            height: 300px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              transition: transform 0.3s ease;
+            }
+
+            .image-placeholder {
+              font-size: 5rem;
+              color: #ccc;
+              font-weight: 700;
+            }
+          }
+
+          &:hover .product-image img {
+            transform: scale(1.1);
+          }
+
+          .product-info {
+            padding: 1.5rem;
+
+            h3 {
+              font-size: 1.3rem;
+              margin-bottom: 0.5rem;
+              color: #333;
+            }
+
+            .product-category {
+              color: #666;
+              font-size: 0.9rem;
+              margin-bottom: 0.5rem;
+            }
+
+            .product-price {
+              font-size: 1.5rem;
+              font-weight: 600;
+              color: #667eea;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 968px) {
+    .products-layout {
+      grid-template-columns: 1fr;
+
+      .filters {
+        position: static;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+
+    .page-title {
+      font-size: 2rem;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
