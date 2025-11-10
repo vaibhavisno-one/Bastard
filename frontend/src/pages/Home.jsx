@@ -42,13 +42,14 @@ const Home = () => {
 
   return (
     <div className="home">
-      {/* Hero Image Grid - Monk Store Style */}
+
       <section className="hero-image-grid">
         <div className="container">
           <div className="grid-layout">
-            {/* Main Large Image */}
+            {/* Top Large Image */}
             <Link to="/products?category=T-Shirt" className="grid-item large">
               <div className="image-wrapper">
+                <img src="/Bastard.png" alt="Premium Collection" />
                 <div className="overlay"></div>
                 <div className="content">
                   <h2>Premium Collection</h2>
@@ -58,10 +59,11 @@ const Home = () => {
               </div>
             </Link>
 
-            {/* Two Stacked Small Images */}
-            <div className="grid-stack">
+            {/* Bottom Row with Two Images */}
+            <div className="bottom-row">
               <Link to="/products?category=Hoodie" className="grid-item small">
                 <div className="image-wrapper">
+                  <img src="/images/barbie.jpg" alt="Hoodies" />
                   <div className="overlay"></div>
                   <div className="content">
                     <h3>Hoodies</h3>
@@ -69,8 +71,10 @@ const Home = () => {
                   </div>
                 </div>
               </Link>
+
               <Link to="/products?category=T-Shirt" className="grid-item small">
                 <div className="image-wrapper">
+                  <img src="/images/unisex.jpg" alt="T-Shirts" />
                   <div className="overlay"></div>
                   <div className="content">
                     <h3>T-Shirts</h3>
@@ -80,10 +84,10 @@ const Home = () => {
               </Link>
             </div>
           </div>
-
-          
         </div>
       </section>
+
+
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
