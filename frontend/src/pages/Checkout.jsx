@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import API from '../api/client';
@@ -18,15 +18,91 @@ const Checkout = () => {
     pincode: '',
   });
 
+  useEffect(() => {
+    // Load Cashfree SDK
+    const script = document.createElement('script');
+    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const handleChange = (e) => {
     setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const totalAmount = getCartTotal();
+
+      // Step 1: Create payment order with Cashfree
+      const { data: paymentData } = await API.post('/payments/create-order', {
+        orderId: `temp_${Date.now()}`,
+        amount: totalAmount,
+        customerInfo: {
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+          address: {
+            street: customerInfo.street,
+            city: customerInfo.city,
+            state: customerInfo.state,
+            pincode: customerInfo.pincode,
+          },
+        },
+      });
+
+      const { paymentSessionId, orderId } = paymentData;
+
+      // Step 2: Initialize Cashfree SDK
+      const cashfree = window.Cashfree({
+        mode: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+      });
+
+      // Step 3: Open payment modal
+      const checkoutOptions = {
+        paymentSessionId: paymentSessionId,
+        returnUrl: `${window.location.origin}/payment/callback?order_id=${orderId}`,
+      };
+
+      cashfree.checkout(checkoutOptions).then((result) => {
+        if (result.error) {
+          toast.error(result.error.message || 'Payment failed');
+          setLoading(false);
+          return;
+        }
+
+        if (result.paymentDetails) {
+          // Payment successful, verify and create order
+          handlePaymentSuccess(orderId, result.paymentDetails);
+        }
+      });
+    } catch (error) {
+      console.error('Payment Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to initiate payment');
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (cashfreeOrderId, paymentDetails) => {
+    try {
+      // Verify payment with backend
+      const { data: verifyData } = await API.post('/payments/verify', {
+        orderId: cashfreeOrderId,
+      });
+
+      if (!verifyData.verified) {
+        toast.error('Payment verification failed');
+        setLoading(false);
+        return;
+      }
+
+      // Create order in database
       const orderData = {
         products: cart,
         customerInfo: {
@@ -40,15 +116,23 @@ const Checkout = () => {
           },
         },
         totalPrice: getCartTotal(),
+        paymentInfo: {
+          cashfreeOrderId: cashfreeOrderId,
+          paymentId: paymentDetails.payment_id || paymentDetails.cf_payment_id,
+          paymentStatus: 'Success',
+          paymentMethod: paymentDetails.payment_method,
+          paidAt: new Date(),
+        },
       };
 
-      const { data } = await API.post('/orders', orderData);
-      
+      const { data: orderResponse } = await API.post('/orders', orderData);
+
       clearCart();
-      toast.success('Order placed successfully!');
+      toast.success('Order placed successfully! 🎉');
       navigate(`/orders`);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to place order');
+      console.error('Order Creation Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to create order');
     } finally {
       setLoading(false);
     }
@@ -65,7 +149,7 @@ const Checkout = () => {
         <h1 className="page-title">Checkout</h1>
 
         <div className="checkout-layout">
-          <form onSubmit={handleSubmit} className="checkout-form">
+          <form onSubmit={handlePayment} className="checkout-form">
             <h3>Shipping Information</h3>
 
             <div className="form-group">
@@ -144,8 +228,13 @@ const Checkout = () => {
               />
             </div>
 
+            <div className="payment-info">
+              <p>💳 Secure payment powered by Cashfree</p>
+              <p>✓ UPI, Cards, Net Banking & Wallets accepted</p>
+            </div>
+
             <button type="submit" className="place-order-btn" disabled={loading}>
-              {loading ? 'Placing Order...' : 'Place Order'}
+              {loading ? 'Processing...' : `Pay ₹${getCartTotal().toLocaleString('en-IN')}`}
             </button>
           </form>
 

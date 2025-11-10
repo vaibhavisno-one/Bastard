@@ -61,6 +61,25 @@ const orderSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  paymentInfo: {
+    cashfreeOrderId: {
+      type: String,
+    },
+    paymentId: {
+      type: String,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['Pending', 'Success', 'Failed', 'Refunded'],
+      default: 'Pending',
+    },
+    paymentMethod: {
+      type: String,
+    },
+    paidAt: {
+      type: Date,
+    },
+  },
   status: {
     type: String,
     enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],

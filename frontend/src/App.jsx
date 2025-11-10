@@ -19,6 +19,7 @@ import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import './App.scss';
 import Footer from './components/Footer';
+import PaymentCallback from './pages/PaymentCallback';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -87,7 +88,9 @@ function App() {
                     </AdminRoute>
                   }
                 />
+                <Route path="/payment/callback" element={<PaymentCallback />} />
               </Routes>
+              
             </main>
             <Footer/>
             <ToastContainer

@@ -2,12 +2,12 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { sendOrderConfirmation, sendAdminOrderNotification } = require('../config/email');
 
-// @desc    Create new order
+// @desc    Create new order (with payment)
 // @route   POST /api/orders
 // @access  Private
 exports.createOrder = async (req, res, next) => {
   try {
-    const { products, customerInfo, totalPrice } = req.body;
+    const { products, customerInfo, totalPrice, paymentInfo } = req.body;
 
     // Validation
     if (!products || products.length === 0) {
@@ -21,6 +21,14 @@ exports.createOrder = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Please provide complete customer information',
+      });
+    }
+
+    // Verify payment was successful
+    if (!paymentInfo || paymentInfo.paymentStatus !== 'Success') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment verification required',
       });
     }
 
@@ -55,6 +63,7 @@ exports.createOrder = async (req, res, next) => {
       products,
       customerInfo,
       totalPrice,
+      paymentInfo,
     });
 
     // Populate product details
@@ -67,6 +76,11 @@ exports.createOrder = async (req, res, next) => {
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Don't fail the order if email fails
+    }
+
+    // Emit order update via socket
+    if (global.emitOrderUpdate) {
+      global.emitOrderUpdate(order);
     }
 
     res.status(201).json({
@@ -229,6 +243,11 @@ exports.updateOrderStatus = async (req, res, next) => {
 
     order.status = status;
     await order.save();
+
+    // Emit order update via socket
+    if (global.emitOrderUpdate) {
+      global.emitOrderUpdate(order);
+    }
 
     res.status(200).json({
       success: true,

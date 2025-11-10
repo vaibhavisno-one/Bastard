@@ -65,6 +65,8 @@ app.get('/api/health', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
+app.use('/api/payments', require('./routes/payments'));
+
 // Socket.IO connection
 io.on('connection', (socket) => {
   console.log('New client connected');
