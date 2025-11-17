@@ -15,6 +15,18 @@ const Products = () => {
     sort: searchParams.get('sort') || '',
   });
 
+  // Update filters when URL params change (e.g., clicking from home page)
+  useEffect(() => {
+    const newFilters = {
+      category: searchParams.get('category') || '',
+      size: searchParams.get('size') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      sort: searchParams.get('sort') || '',
+    };
+    setFilters(newFilters);
+  }, [searchParams]);
+
   useEffect(() => {
     fetchProducts();
   }, [filters]);
@@ -60,14 +72,34 @@ const Products = () => {
     setSearchParams({});
   };
 
+  const getActiveFilterCount = () => {
+    return Object.values(filters).filter(value => value !== '').length;
+  };
+
   return (
     <div className="products-page">
       <div className="container">
-        <h1 className="page-title">Our Products</h1>
+        <div className="page-header">
+          <h1 className="page-title">
+            {filters.category ? `${filters.category}s` : 'Our Products'}
+          </h1>
+          {getActiveFilterCount() > 0 && (
+            <p className="filter-count">
+              {getActiveFilterCount()} filter{getActiveFilterCount() > 1 ? 's' : ''} applied
+            </p>
+          )}
+        </div>
 
         <div className="products-layout">
           <aside className="filters">
-            <h3>Filters</h3>
+            <div className="filters-header">
+              <h3>Filters</h3>
+              {getActiveFilterCount() > 0 && (
+                <button className="clear-all-link" onClick={clearFilters}>
+                  Clear All
+                </button>
+              )}
+            </div>
 
             <div className="filter-group">
               <label>Category</label>
@@ -78,26 +110,22 @@ const Products = () => {
                 <option value="">All Categories</option>
                 <option value="T-Shirt">T-Shirts</option>
                 <option value="Hoodie">Hoodies</option>
-                <option value="Hoodie">Men</option>
-                <option value="Hoodie">Women</option>
-                <option value="Hoodie">Unisex</option>
               </select>
             </div>
 
             <div className="filter-group">
               <label>Size</label>
-              <select
-                value={filters.size}
-                onChange={(e) => handleFilterChange('size', e.target.value)}
-              >
-                <option value="">All Sizes</option>
-                <option value="XS">XS</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
-              </select>
+              <div className="size-buttons">
+                {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(size => (
+                  <button
+                    key={size}
+                    className={`size-btn ${filters.size === size ? 'active' : ''}`}
+                    onClick={() => handleFilterChange('size', filters.size === size ? '' : size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="filter-group">
@@ -128,44 +156,63 @@ const Products = () => {
                 <option value="">Latest</option>
                 <option value="price_asc">Price: Low to High</option>
                 <option value="price_desc">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
               </select>
             </div>
 
             <button className="clear-filters" onClick={clearFilters}>
-              Clear Filters
+              Clear All Filters
             </button>
           </aside>
 
           <div className="products-content">
             {loading ? (
-              <div className="loading">Loading products...</div>
+              <div className="loading">
+                <div className="spinner"></div>
+                <p>Loading products...</p>
+              </div>
             ) : products.length === 0 ? (
               <div className="no-products">
                 <p>No products found</p>
+                <button onClick={clearFilters} className="clear-btn">
+                  Clear Filters
+                </button>
               </div>
             ) : (
-              <div className="product-grid">
-                {products.map(product => (
-                  <Link
-                    to={`/products/${product._id}`}
-                    key={product._id}
-                    className="product-card"
-                  >
-                    <div className="product-image">
-                      {product.images && product.images[0] ? (
-                        <img src={product.images[0]} alt={product.name} />
-                      ) : (
-                        <div className="image-placeholder">{product.name[0]}</div>
-                      )}
-                    </div>
-                    <div className="product-info">
-                      <h3>{product.name}</h3>
-                      <p className="product-category">{product.category}</p>
-                      <p className="product-price">₹{product.price.toLocaleString('en-IN')}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              <>
+                <div className="products-header">
+                  <p className="products-count">
+                    Showing {products.length} product{products.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+                <div className="product-grid">
+                  {products.map(product => (
+                    <Link
+                      to={`/products/${product._id}`}
+                      key={product._id}
+                      className="product-card"
+                    >
+                      <div className="product-image">
+                        {product.images && product.images[0] ? (
+                          <img src={product.images[0]} alt={product.name} loading="lazy" />
+                        ) : (
+                          <div className="image-placeholder">{product.name[0]}</div>
+                        )}
+                        {product.rating > 0 && (
+                          <div className="rating-badge">
+                            ★ {product.rating.toFixed(1)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="product-info">
+                        <h3>{product.name}</h3>
+                        <p className="product-category">{product.category}</p>
+                        <p className="product-price">₹{product.price.toLocaleString('en-IN')}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>

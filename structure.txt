@@ -1,5 +1,3 @@
-file .gitignore
-file .prettierignore
 folder backend
   file .env
   file .env.example
@@ -32,6 +30,7 @@ folder frontend
   file package-lock.json
   file package.json
   folder public
+    folder assets
     file Bastard.png
     file index.html
   folder src
@@ -82,4 +81,3 @@ folder frontend
       file Profile.scss
       file ResetPassword.jsx
       file ResetPassword.scss
-file README.md

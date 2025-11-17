@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 
 // @desc    Get all products with filters
 // @route   GET /api/products
@@ -219,14 +220,41 @@ exports.getBestSellers = async (req, res, next) => {
   }
 };
 
-// @desc    Add product review
+// @desc    Check if user purchased product
+// @route   GET /api/products/:id/check-purchase
+// @access  Private
+exports.checkPurchase = async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+    const userId = req.user._id;
+
+    // Find orders where user bought this product and payment was successful
+    const hasPurchased = await Order.findOne({
+      customerId: userId,
+      'products.productId': productId,
+      paymentStatus: 'Success',
+      status: { $nin: ['Cancelled', 'Failed'] }
+    });
+
+    res.status(200).json({
+      success: true,
+      hasPurchased: !!hasPurchased,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add product review (ONLY FOR VERIFIED BUYERS)
 // @route   POST /api/products/:id/reviews
 // @access  Private
 exports.addReview = async (req, res, next) => {
   try {
     const { rating, comment } = req.body;
+    const productId = req.params.id;
+    const userId = req.user._id;
 
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(productId);
 
     if (!product) {
       return res.status(404).json({
@@ -235,9 +263,24 @@ exports.addReview = async (req, res, next) => {
       });
     }
 
+    // Check if user has purchased this product with successful payment
+    const hasPurchased = await Order.findOne({
+      customerId: userId,
+      'products.productId': productId,
+      paymentStatus: 'Success',
+      status: { $nin: ['Cancelled', 'Failed'] }
+    });
+
+    if (!hasPurchased) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only review products you have purchased',
+      });
+    }
+
     // Check if user already reviewed
     const alreadyReviewed = product.reviews.find(
-      (review) => review.user.toString() === req.user._id.toString()
+      (review) => review.user.toString() === userId.toString()
     );
 
     if (alreadyReviewed) {
@@ -248,16 +291,14 @@ exports.addReview = async (req, res, next) => {
     }
 
     const review = {
-      user: req.user._id,
+      user: userId,
       name: req.user.name,
       rating: Number(rating),
       comment,
     };
 
     product.reviews.push(review);
-
     product.numReviews = product.reviews.length;
-
     product.rating =
       product.reviews.reduce((acc, item) => item.rating + acc, 0) /
       product.reviews.length;

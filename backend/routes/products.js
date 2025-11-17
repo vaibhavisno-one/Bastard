@@ -12,6 +12,7 @@ const {
   getBestSellers,
   addReview,
   uploadImages,
+  checkPurchase,
 } = require('../controllers/productController');
 const { protect, adminOnly } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
@@ -32,6 +33,10 @@ router.route('/:id')
   .put(protect, adminOnly, updateProduct)
   .delete(protect, adminOnly, deleteProduct);
 
+// Check if user purchased product (must be before /:id/reviews to avoid route conflict)
+router.get('/:id/check-purchase', protect, checkPurchase);
+
+// Add review (only for verified buyers)
 router.post('/:id/reviews', protect, addReview);
 
 module.exports = router;

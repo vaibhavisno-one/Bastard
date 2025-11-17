@@ -3,13 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 import {
-  FiSearch,
   FiUser,
   FiShoppingBag,
   FiLogOut,
   FiMenu,
   FiX,
-  FiPackage
+  FiPackage,
+  FiGrid
 } from 'react-icons/fi';
 import { MdSpaceDashboard } from 'react-icons/md';
 import './Header.scss';
@@ -19,25 +19,12 @@ const Header = () => {
   const { getCartCount } = useContext(CartContext);
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogout = () => {
     logout();
     navigate('/');
     setMobileMenuOpen(false);
   };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
-
-
 
   return (
     <>
@@ -58,13 +45,15 @@ const Header = () => {
             </Link>
 
             <nav className={`nav-icons ${mobileMenuOpen ? 'mobile-active' : ''}`}>
-              <button
+              {/* Products Link - Replaces Search */}
+              <Link
+                to="/products"
                 className="nav-icon"
-                data-tooltip="Search"
-                onClick={() => setSearchOpen(!searchOpen)}
+                data-tooltip="Products"
+                onClick={() => setMobileMenuOpen(false)}
               >
-                <FiSearch />
-              </button>
+                <FiGrid />
+              </Link>
 
               {user ? (
                 <>
@@ -107,28 +96,6 @@ const Header = () => {
             </nav>
           </div>
         </div>
-
-        {/* Search Bar */}
-        {searchOpen && (
-          <div className="search-bar">
-            <div className="container">
-              <form onSubmit={handleSearch} className="search-form">
-                <input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                />
-                <button type="submit" className="search-btn">
-                  <FiSearch />
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-
 
         {/* Free Shipping Banner */}
         <div className="shipping-banner">

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { FaStar } from 'react-icons/fa';
 import API from '../api/client';
@@ -12,12 +12,38 @@ const ReviewSection = ({ product, onReviewAdded }) => {
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [checkingPurchase, setCheckingPurchase] = useState(false);
+
+  // Check if user has purchased this product
+  useEffect(() => {
+    if (user && product) {
+      checkPurchaseStatus();
+    }
+  }, [user, product]);
+
+  const checkPurchaseStatus = async () => {
+    setCheckingPurchase(true);
+    try {
+      const { data } = await API.get(`/products/${product._id}/check-purchase`);
+      setHasPurchased(data.hasPurchased);
+    } catch (error) {
+      console.error('Error checking purchase status:', error);
+    } finally {
+      setCheckingPurchase(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!user) {
       toast.error('Please login to add a review');
+      return;
+    }
+
+    if (!hasPurchased) {
+      toast.error('You can only review products you have purchased');
       return;
     }
 
@@ -69,8 +95,11 @@ const ReviewSection = ({ product, onReviewAdded }) => {
       </div>
 
       {/* Add Review Form */}
-      {user && (
+      {user && hasPurchased && (
         <div className="add-review">
+          <div className="verified-badge">
+            <span>✓ Verified Purchase</span>
+          </div>
           <h3>Write a Review</h3>
           <form onSubmit={handleSubmit}>
             <div className="star-rating-input">
@@ -112,20 +141,42 @@ const ReviewSection = ({ product, onReviewAdded }) => {
         </div>
       )}
 
+      {user && !hasPurchased && !checkingPurchase && (
+        <div className="purchase-required">
+          <div className="info-icon">🛍️</div>
+          <h3>Purchase Required to Review</h3>
+          <p>You need to purchase this product before you can write a review.</p>
+          <p className="note">This helps ensure authentic reviews from real customers.</p>
+        </div>
+      )}
+
       {!user && (
         <div className="login-prompt">
-          <p>Please login to write a review</p>
+          <div className="info-icon">👤</div>
+          <h3>Login to Write a Review</h3>
+          <p>Please login to share your experience with this product.</p>
+        </div>
+      )}
+
+      {checkingPurchase && (
+        <div className="checking-purchase">
+          <div className="spinner"></div>
+          <p>Checking purchase status...</p>
         </div>
       )}
 
       {/* Reviews List */}
       <div className="reviews-list">
+        <h3>Customer Reviews</h3>
         {product.reviews && product.reviews.length > 0 ? (
           product.reviews.map((review) => (
             <div key={review._id} className="review-item">
               <div className="review-header">
                 <div>
-                  <h4>{review.name}</h4>
+                  <div className="reviewer-info">
+                    <h4>{review.name}</h4>
+                    <span className="verified-badge-small">✓ Verified Purchase</span>
+                  </div>
                   <Rating value={review.rating} size="0.9rem" />
                 </div>
                 <span className="review-date">
@@ -140,7 +191,9 @@ const ReviewSection = ({ product, onReviewAdded }) => {
             </div>
           ))
         ) : (
-          <p className="no-reviews">No reviews yet. Be the first to review this product!</p>
+          <div className="no-reviews">
+            <p>No reviews yet. Be the first to review this product!</p>
+          </div>
         )}
       </div>
     </div>
