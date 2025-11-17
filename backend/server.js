@@ -31,10 +31,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Enable CORS
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "https://bastard.fun",
+      "https://www.bastard.fun",
+      process.env.CLIENT_URL
+    ],
+    credentials: true,
+  })
+);
+
 
 // Express session (for passport)
 app.use(

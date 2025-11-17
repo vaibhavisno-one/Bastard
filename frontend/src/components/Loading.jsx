@@ -8,7 +8,7 @@ const Loading = ({ fullScreen = false }) => {
         <div className="spinner-ring"></div>
         <div className="spinner-ring"></div>
         <div className="spinner-ring"></div>
-        <div className="brand-text">FASHION STORE</div>
+        <div className="brand-text">Bastard</div>
       </div>
     </div>
   );
