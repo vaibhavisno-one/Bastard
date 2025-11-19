@@ -1,84 +1,70 @@
-
-
-import { Link } from 'react-router-dom';
-// import { Container } from 'reactstrap';
+import { Link } from "react-router-dom";
+import "./Footer.scss";
 
 
 const Footer = () => {
-  const infoLinks = [
-    { id: 0, name: 'Contact Us', to: '/contact' },
-    { id: 1, name: 'Terms & Condition', to: '/terms&contidions' }
-    
-  ];
-
-  const footerBusinessLinks = (
-    <ul className='support-links'>
-      <li className='footer-link'>
-        <Link to='/profile'>Account Details</Link>
-      </li>
-      
-    </ul>
-  );
-
-  const footerLinks = infoLinks.map(item => (
-    <li key={item.id} className='footer-link'>
-      <Link key={item.id} to={item.to}>
-        {item.name}
-      </Link>
-    </li>
-  ));
-
   return (
-    <footer className='footer'>
-      
-        <div className='footer-content'>
-          <div className='footer-block'>
-            <div className='block-title'>
-              <h3 className='text-uppercase'>Customer Service</h3>
-            </div>
-            <div className='block-content'>
-              <ul>{footerLinks}</ul>
-            </div>
+    <footer className="footer">
+      <div className="footer-container">
+        
+        {/* LEFT SIDE */}
+        <div className="footer-left">
+          <div className="footer-logo">
+            <img
+          src="/Bastard.png"
+          alt="Bastard Logo"
+          height={64}
+          className="logo h-12 w-auto object-contain"
+        />
+            <h2>bastard_wears</h2>
           </div>
-          <div className='footer-block'>
-            <div className='block-title'>
-              <h3 className='text-uppercase'>Links</h3>
-            </div>
-            <div className='block-content'>
-              <ul>{footerLinks}</ul>
-            </div>
+
+          <p>A modern streetwear brand crafted for the bold.</p>
+          <p>
+            Built with love by{" "}
+            <a href="https://instagram.com/bastard_wears" target="_blank">
+              @bastard_wears
+            </a>
+          </p>
+        </div>
+
+        {/* RIGHT COLUMNS */}
+        <div className="footer-right">
+
+          <div className="footer-col">
+            <h4>Shop</h4>
+            <Link to="/new-arrivals">New Arrivals</Link>
+            <Link to="/products">Products</Link>
+            <Link to="/best-sellers">Best Sellers</Link>
+          </div>
+
+          <div className="footer-col">
+            <h4>Support</h4>
+            <Link to="/contact">Contact</Link>
+            <Link to="/faq">FAQ</Link>
+            <Link to="/track-order">Track Order</Link>
+          </div>
+
+          <div className="footer-col">
+            <h4>Company</h4>
+            <Link to="/about">About Us</Link>
+            <Link to="/careers">Careers</Link>
+            <Link to="/profile">My Account</Link>
+          </div>
+
+          <div className="footer-col">
+            <h4>Legal</h4>
+            <Link to="/privacy-policy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
+            <Link to="/returns">Returns</Link>
           </div>
 
         </div>
-        <div className='footer-copyright'>
-          <span>© {new Date().getFullYear()} bastard_wears</span>
-        </div>
-        <ul className='footer-social-item'>
-          <li>
+      </div>
 
-          </li>
-          <li>
-            <a
-              href="https://www.instagram.com/bastard_wears/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span className="instagram-icon" />
-            </a>
-
-          </li>
-          <li>
-            <a href='/#pinterest' rel='noreferrer noopener' target='_blank'>
-              <span className='pinterest-icon' />
-            </a>
-          </li>
-          <li>
-            <a href='/#twitter' rel='noreferrer noopener' target='_blank'>
-              <span className='twitter-icon' />
-            </a>
-          </li>
-        </ul>
-      
+      <div className="footer-bottom">
+        © {new Date().getFullYear()} bastard_wears. All rights reserved.
+      </div>
     </footer>
   );
 };

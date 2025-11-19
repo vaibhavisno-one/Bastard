@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import API from '../api/client';
+import Loading from '../components/Loading';
 import './MyOrders.scss';
 
 const MyOrders = () => {
@@ -35,7 +36,7 @@ const MyOrders = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading orders...</div>;
+    return <Loading fullScreen />;
   }
 
   if (orders.length === 0) {

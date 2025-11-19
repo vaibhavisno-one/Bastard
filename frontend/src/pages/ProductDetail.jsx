@@ -5,6 +5,7 @@ import API from '../api/client';
 import { CartContext } from '../context/CartContext';
 import ReviewSection from '../components/ReviewSection';
 import Rating from '../components/Rating';
+import Loading from '../components/Loading';
 import './ProductDetail.scss';
 
 const ProductDetail = () => {
@@ -55,7 +56,7 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <Loading fullScreen />;
   }
 
   if (!product) {
@@ -92,13 +93,13 @@ const ProductDetail = () => {
           <div className="product-details">
             <h1>{product.name}</h1>
             <p className="product-category">{product.category}</p>
-            
+
             {product.rating > 0 && (
               <div className="product-rating">
                 <Rating value={product.rating} text={`${product.numReviews} reviews`} size="1.1rem" />
               </div>
             )}
-            
+
             <p className="product-price">₹{product.price.toLocaleString('en-IN')}</p>
 
             <div className="product-description">

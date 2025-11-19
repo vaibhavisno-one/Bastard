@@ -8,10 +8,16 @@ const Loading = ({ fullScreen = false }) => {
         <div className="spinner-ring"></div>
         <div className="spinner-ring"></div>
         <div className="spinner-ring"></div>
-        <div className="brand-text">Bastard</div>
+        {/* <div className="brand-text">Bastard</div> */}
+        <img
+          src="/Bastard.png"
+          alt="Bastard Logo"
+          height={54}
+          className="logo h-12 w-auto object-contain"
+        />
       </div>
     </div>
   );
 };
 
-export default Loading;
+export default Loading; 

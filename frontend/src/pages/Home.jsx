@@ -10,7 +10,7 @@ const Home = () => {
   const [newArrivals, setNewArrivals] = useState([]);
   const [trending, setTrending] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     fetchAllProducts();

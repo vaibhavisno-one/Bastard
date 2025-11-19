@@ -1,3 +1,5 @@
+file .gitignore
+file .prettierignore
 folder backend
   file .env
   file .env.example
@@ -9,6 +11,7 @@ folder backend
   folder controllers
     file authController.js
     file orderController.js
+    file paymentController.js
     file productController.js
   folder middleware
     file auth.js
@@ -22,6 +25,7 @@ folder backend
   folder routes
     file auth.js
     file orders.js
+    file payments.js
     file products.js
   file server.js
 folder frontend
@@ -32,6 +36,9 @@ folder frontend
   folder public
     folder assets
     file Bastard.png
+    folder images
+      file barbie.jpg
+      file unisex.jpg
     file index.html
   folder src
     folder api
@@ -73,6 +80,8 @@ folder frontend
       file Login.scss
       file MyOrders.jsx
       file MyOrders.scss
+      file PaymentCallback.jsx
+      file PaymentCallback.scss
       file ProductDetail.jsx
       file ProductDetail.scss
       file Products.jsx
@@ -81,3 +90,5 @@ folder frontend
       file Profile.scss
       file ResetPassword.jsx
       file ResetPassword.scss
+file README.md
+file structure.txt

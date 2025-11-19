@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import API from '../api/client';
 import './Products.scss';
+import Loading from '../components/Loading';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -75,6 +76,10 @@ const Products = () => {
   const getActiveFilterCount = () => {
     return Object.values(filters).filter(value => value !== '').length;
   };
+
+  if (loading) {
+    return <Loading fullScreen />;
+  }
 
   return (
     <div className="products-page">

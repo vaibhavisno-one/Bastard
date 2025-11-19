@@ -370,7 +370,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* ✅ Image Upload Section */}
+                {/*  Image Upload Section */}
                 <div className="form-group">
                   <label>Product Images</label>
                   <ImageUpload

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import API from '../api/client';
 import { CartContext } from '../context/CartContext';
+import Loading from '../components/Loading';
 import './Checkout.scss';
 
 const Checkout = () => {
@@ -141,6 +142,10 @@ const Checkout = () => {
   if (cart.length === 0) {
     navigate('/cart');
     return null;
+  }
+  
+  if (loading) {
+    return <Loading fullScreen />;
   }
 
   return (
