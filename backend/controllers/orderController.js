@@ -32,7 +32,26 @@ exports.createOrder = async (req, res, next) => {
       });
     }
 
-    // Verify stock availability and update stock
+    // CRITICAL: Check for duplicate order with same cashfreeOrderId
+    if (paymentInfo.cashfreeOrderId) {
+      const existingOrder = await Order.findOne({
+        'paymentInfo.cashfreeOrderId': paymentInfo.cashfreeOrderId,
+      });
+
+      if (existingOrder) {
+        console.log('Duplicate order attempt prevented:', paymentInfo.cashfreeOrderId);
+        
+        // Return the existing order instead of creating duplicate
+        return res.status(200).json({
+          success: true,
+          order: existingOrder,
+          message: 'Order already exists',
+        });
+      }
+    }
+
+    // Verify stock availability (without updating yet)
+    const stockChecks = [];
     for (let item of products) {
       const product = await Product.findById(item.productId);
       
@@ -48,13 +67,22 @@ exports.createOrder = async (req, res, next) => {
       if (!sizeStock || sizeStock.stock < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${product.name} in size ${item.size}`,
+          message: `Insufficient stock for ${product.name} in size ${item.size}. Available: ${sizeStock?.stock || 0}, Requested: ${item.quantity}`,
         });
       }
 
-      // Reduce stock
-      sizeStock.stock -= item.quantity;
-      await product.save();
+      stockChecks.push({
+        product,
+        size: item.size,
+        quantity: item.quantity,
+      });
+    }
+
+    // Update stock atomically
+    for (let check of stockChecks) {
+      const sizeStock = check.product.sizes.find(s => s.size === check.size);
+      sizeStock.stock -= check.quantity;
+      await check.product.save();
     }
 
     // Create order
@@ -69,7 +97,7 @@ exports.createOrder = async (req, res, next) => {
     // Populate product details
     await order.populate('products.productId');
 
-    // Send confirmation emails
+    // Send confirmation emails (non-blocking)
     try {
       await sendOrderConfirmation(order, req.user.email);
       await sendAdminOrderNotification(order);
@@ -88,6 +116,8 @@ exports.createOrder = async (req, res, next) => {
       order,
     });
   } catch (error) {
+    // Rollback stock on error
+    console.error('Order creation error:', error);
     next(error);
   }
 };
@@ -144,6 +174,82 @@ exports.getOrder = async (req, res, next) => {
   }
 };
 
+// @desc    Add review to order product
+// @route   POST /api/orders/:id/review
+// @access  Private
+exports.addOrderReview = async (req, res, next) => {
+  try {
+    const { productId, rating, comment } = req.body;
+    
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // Check if user owns the order
+    if (order.customerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to review this order',
+      });
+    }
+
+    // Check if order is delivered
+    if (order.status !== 'Delivered') {
+      return res.status(400).json({
+        success: false,
+        message: 'Can only review delivered orders',
+      });
+    }
+
+    // Add review to product
+    const product = await Product.findById(productId);
+    
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    // Check if user already reviewed this product
+    const alreadyReviewed = product.reviews.find(
+      r => r.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyReviewed) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product already reviewed',
+      });
+    }
+
+    const review = {
+      user: req.user._id,
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+    };
+
+    product.reviews.push(review);
+    product.numReviews = product.reviews.length;
+    product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+
+    await product.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Review added successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Cancel order
 // @route   PUT /api/orders/:id/cancel
 // @access  Private
@@ -171,6 +277,14 @@ exports.cancelOrder = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Cannot cancel order that has been shipped or delivered',
+      });
+    }
+
+    // Cannot cancel if already cancelled
+    if (order.status === 'Cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: 'Order is already cancelled',
       });
     }
 

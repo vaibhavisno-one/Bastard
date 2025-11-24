@@ -38,23 +38,25 @@ const AdminDashboard = () => {
     }
     fetchProducts();
     fetchOrders();
-  }, [user]);
+  }, [user, navigate]);
 
   const fetchProducts = async () => {
     try {
       const { data } = await API.get('/products');
-      setProducts(data.products);
+      setProducts(data.products || []);
     } catch (error) {
-      toast.error('Failed to fetch products');
+      console.error('Fetch products error:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch products');
     }
   };
 
   const fetchOrders = async () => {
     try {
-      const { data } = await API.get('/orders');
-      setOrders(data.orders);
+      const { data } = await API.get('/orders/admin/all');
+      setOrders(data.orders || []);
     } catch (error) {
-      toast.error('Failed to fetch orders');
+      console.error('Fetch orders error:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch orders');
     }
   };
 

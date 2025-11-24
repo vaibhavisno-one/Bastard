@@ -7,7 +7,7 @@ import Loading from '../components/Loading';
 import './Checkout.scss';
 
 const Checkout = () => {
-  const { cart, getCartTotal, clearCart } = useContext(CartContext);
+  const { cart, getCartTotal } = useContext(CartContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
@@ -20,6 +20,10 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    // Clear any stale order data on mount
+    sessionStorage.removeItem('pendingOrder');
+    sessionStorage.removeItem('paymentProcessing');
+
     // Load Cashfree SDK
     const script = document.createElement('script');
     script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
@@ -27,7 +31,9 @@ const Checkout = () => {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
@@ -37,12 +43,54 @@ const Checkout = () => {
 
   const handlePayment = async (e) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (loading || sessionStorage.getItem('paymentProcessing') === 'true') {
+      toast.warning('Payment is already being processed');
+      return;
+    }
+
     setLoading(true);
+    sessionStorage.setItem('paymentProcessing', 'true');
 
     try {
       const totalAmount = getCartTotal();
 
-      // Step 1: Create payment order with Cashfree
+      // Validate cart has items
+      if (!cart || cart.length === 0) {
+        toast.error('Your cart is empty');
+        navigate('/cart');
+        return;
+      }
+
+      // Create order data structure
+      const orderData = {
+        products: cart.map(item => ({
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          quantity: item.quantity,
+          size: item.size,
+        })),
+        customerInfo: {
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+          address: {
+            street: customerInfo.street,
+            city: customerInfo.city,
+            state: customerInfo.state,
+            pincode: customerInfo.pincode,
+          },
+        },
+        totalPrice: totalAmount,
+        timestamp: Date.now(), // To track order age
+      };
+
+      // Store order data temporarily
+      sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+      // Create payment order with Cashfree
       const { data: paymentData } = await API.post('/payments/create-order', {
         orderId: `temp_${Date.now()}`,
         amount: totalAmount,
@@ -60,90 +108,72 @@ const Checkout = () => {
 
       const { paymentSessionId, orderId } = paymentData;
 
-      // Step 2: Initialize Cashfree SDK
+      if (!paymentSessionId || !orderId) {
+        throw new Error('Invalid payment session created');
+      }
+
+      // Store cashfree order ID
+      sessionStorage.setItem('cashfreeOrderId', orderId);
+
+      // Initialize Cashfree SDK
       const cashfree = window.Cashfree({
         mode: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
       });
 
-      // Step 3: Open payment modal
+      // Open payment modal
       const checkoutOptions = {
         paymentSessionId: paymentSessionId,
         returnUrl: `${window.location.origin}/payment/callback?order_id=${orderId}`,
       };
 
-      cashfree.checkout(checkoutOptions).then((result) => {
-        if (result.error) {
-          toast.error(result.error.message || 'Payment failed');
-          setLoading(false);
-          return;
-        }
+      const result = await cashfree.checkout(checkoutOptions);
 
-        if (result.paymentDetails) {
-          // Payment successful, verify and create order
-          handlePaymentSuccess(orderId, result.paymentDetails);
-        }
-      });
-    } catch (error) {
-      console.error('Payment Error:', error);
-      toast.error(error.response?.data?.message || 'Failed to initiate payment');
-      setLoading(false);
-    }
-  };
-
-  const handlePaymentSuccess = async (cashfreeOrderId, paymentDetails) => {
-    try {
-      // Verify payment with backend
-      const { data: verifyData } = await API.post('/payments/verify', {
-        orderId: cashfreeOrderId,
-      });
-
-      if (!verifyData.verified) {
-        toast.error('Payment verification failed');
+      // Handle payment modal closure without completion
+      if (result.error) {
+        console.error('Payment Error:', result.error);
+        toast.error(result.error.message || 'Payment failed');
+        cleanupPaymentData();
         setLoading(false);
-        return;
       }
+      // If payment completed, redirect will happen automatically
+      // If user closed modal, they stay on checkout page
 
-      // Create order in database
-      const orderData = {
-        products: cart,
-        customerInfo: {
-          name: customerInfo.name,
-          phone: customerInfo.phone,
-          address: {
-            street: customerInfo.street,
-            city: customerInfo.city,
-            state: customerInfo.state,
-            pincode: customerInfo.pincode,
-          },
-        },
-        totalPrice: getCartTotal(),
-        paymentInfo: {
-          cashfreeOrderId: cashfreeOrderId,
-          paymentId: paymentDetails.payment_id || paymentDetails.cf_payment_id,
-          paymentStatus: 'Success',
-          paymentMethod: paymentDetails.payment_method,
-          paidAt: new Date(),
-        },
-      };
-
-      const { data: orderResponse } = await API.post('/orders', orderData);
-
-      clearCart();
-      toast.success('Order placed successfully! 🎉');
-      navigate(`/orders`);
     } catch (error) {
-      console.error('Order Creation Error:', error);
-      toast.error(error.response?.data?.message || 'Failed to create order');
-    } finally {
+      console.error('Checkout Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to initiate payment');
+      cleanupPaymentData();
       setLoading(false);
     }
   };
+
+  const cleanupPaymentData = () => {
+    sessionStorage.removeItem('pendingOrder');
+    sessionStorage.removeItem('paymentProcessing');
+    sessionStorage.removeItem('cashfreeOrderId');
+  };
+
+  // Handle page visibility - detect if user returns to page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // User returned to page - check if they abandoned payment
+        const processing = sessionStorage.getItem('paymentProcessing');
+        if (processing === 'true' && loading) {
+          // Give them option to check payment status
+          setLoading(false);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [loading]);
 
   if (cart.length === 0) {
     navigate('/cart');
     return null;
   }
-  
+
   if (loading) {
     return <Loading fullScreen />;
   }
@@ -166,6 +196,7 @@ const Checkout = () => {
                 onChange={handleChange}
                 required
                 placeholder="Enter your full name"
+                disabled={loading}
               />
             </div>
 
@@ -179,6 +210,7 @@ const Checkout = () => {
                 required
                 pattern="[0-9]{10}"
                 placeholder="10-digit mobile number"
+                disabled={loading}
               />
             </div>
 
@@ -191,6 +223,7 @@ const Checkout = () => {
                 onChange={handleChange}
                 required
                 placeholder="House no, Street name"
+                disabled={loading}
               />
             </div>
 
@@ -204,6 +237,7 @@ const Checkout = () => {
                   onChange={handleChange}
                   required
                   placeholder="City"
+                  disabled={loading}
                 />
               </div>
 
@@ -216,6 +250,7 @@ const Checkout = () => {
                   onChange={handleChange}
                   required
                   placeholder="State"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -230,6 +265,7 @@ const Checkout = () => {
                 required
                 pattern="[0-9]{6}"
                 placeholder="6-digit pincode"
+                disabled={loading}
               />
             </div>
 
@@ -246,8 +282,8 @@ const Checkout = () => {
           <div className="order-summary">
             <h3>Order Summary</h3>
             <div className="summary-items">
-              {cart.map((item) => (
-                <div key={`${item.productId}-${item.size}`} className="summary-item">
+              {cart.map((item, index) => (
+                <div key={`${item.productId}-${item.size}-${index}`} className="summary-item">
                   <div>
                     <p className="item-name">{item.name}</p>
                     <p className="item-details">Size: {item.size} | Qty: {item.quantity}</p>

@@ -1,120 +1,209 @@
-import React, { useState, useContext } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import API from '../api/client';
-import { AuthContext } from '../context/AuthContext';
-import './Login.scss';
+import React, { useState, useContext, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { IoMdCheckmark } from "react-icons/io";
+import { toast } from "react-toastify";
+import API from "../api/client";
+import { AuthContext } from "../context/AuthContext";
+import "./Login.scss";
+
+const AnimatedInputWithCheck = ({
+  label,
+  value,
+  name,
+  type = "text",
+  onChange,
+  required,
+  placeholder,
+  showCheck = false,
+}) => {
+  const circleLength = 2 * Math.PI * 30;
+  return (
+    <motion.div className="animated-input-box">
+      <label>{label}</label>
+      <div className="input-with-check">
+        <motion.input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          placeholder={placeholder}
+          className="animated-input"
+          whileFocus={{ scale: 1.02 }}
+        />
+        {showCheck && (
+          <motion.svg width="24" height="24" className="check-svg">
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="#22c55e"
+              strokeWidth="2"
+              fill="transparent"
+              strokeDasharray={circleLength}
+              strokeDashoffset={circleLength}
+              animate={{ strokeDashoffset: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            />
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="#22c55e"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.2 }}
+            />
+            <motion.div
+              className="check-icon"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.2 }}
+            >
+              <IoMdCheckmark size={14} color="#fff" />
+            </motion.div>
+          </motion.svg>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [showNameCheck, setShowNameCheck] = useState(false);
+  const [showPassCheck, setShowPassCheck] = useState(false);
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
+  const redirect = searchParams.get("redirect") || "/";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    if (!isLogin && e.target.name === "name" && e.target.value.length > 2) {
+      setShowNameCheck(true);
+    }
+    if (e.target.name === "password" && e.target.value.length >= 6) {
+      setShowPassCheck(true);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const endpoint = isLogin ? "/auth/login" : "/auth/register";
       const { data } = await API.post(endpoint, formData);
-      
+
       login(data.token, data.user);
-      toast.success(isLogin ? 'Login successful!' : 'Registration successful!');
+      toast.success(isLogin ? "Logged in!" : "Account created!");
       navigate(redirect);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Something went wrong');
+      toast.error(error.response?.data?.message || "Something went wrong.");
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogle = () => {
     window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-card">
-          <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-          <p className="subtitle">
-            {isLogin ? 'Login to your account' : 'Sign up to get started'}
-          </p>
+    <div className="animated-login-page">
+      <motion.div
+        className="animated-card"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="title">{isLogin ? "Welcome Back" : "Create Account"}</h2>
+        <p className="subtitle">
+          {isLogin ? "Login to continue" : "Sign up to begin"}
+        </p>
 
-          <form onSubmit={handleSubmit}>
-            {!isLogin && (
-              <div className="form-group">
-                <label>Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                  placeholder="Enter your name"
-                />
-              </div>
-            )}
+        <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <AnimatedInputWithCheck
+              label="Name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleChange}
+              required={!isLogin}
+              placeholder="Your full name"
+              showCheck={showNameCheck}
+            />
+          )}
 
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="Enter your email"
-              />
-            </div>
+          <AnimatedInputWithCheck
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            placeholder="Email address"
+            showCheck={false}
+          />
 
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength="6"
-                placeholder="Enter your password"
-              />
-            </div>
+          <AnimatedInputWithCheck
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            placeholder="Password"
+            showCheck={showPassCheck}
+          />
 
-            <button type="submit" className="submit-btn">
-              {isLogin ? 'Login' : 'Sign Up'}
-            </button>
-          </form>
+          <motion.button
+            className="primary-btn"
+            type="submit"
+            whileTap={{ scale: 0.97 }}
+          >
+            {isLogin ? "Login" : "Sign Up"}
+          </motion.button>
+        </form>
 
-          <div className="divider">
-            <span>OR</span>
-          </div>
-
-          <button className="google-btn" onClick={handleGoogleLogin}>
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-            Continue with Google
-          </button>
-
-          <p className="toggle-text">
-            {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <button onClick={() => setIsLogin(!isLogin)} className="toggle-btn">
-              {isLogin ? 'Sign Up' : 'Login'}
-            </button>
-          </p>
-
-          <Link to="/admin/login" className="admin-link">
-            Admin Login
-          </Link>
+        <div className="divider">
+          <span>OR</span>
         </div>
-      </div>
+
+        <motion.button
+          className="google-btn"
+          onClick={handleGoogle}
+          whileTap={{ scale: 0.97 }}
+        >
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+          Continue with Google
+        </motion.button>
+
+        <p className="bottom-text">
+          {isLogin ? "No account? " : "Have an account? "}
+          <button
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setShowNameCheck(false);
+              setShowPassCheck(false);
+              setFormData({ name: "", email: "", password: "" });
+            }}
+            className="toggle-btn"
+          >
+            {isLogin ? "Sign Up" : "Login"}
+          </button>
+        </p>
+
+        <Link to="/admin/login" className="admin-link">
+          Admin Login
+        </Link>
+
+        <Link to="/forgot-password" className="admin-link">
+          Forgot PassWord?
+        </Link>
+      </motion.div>
     </div>
   );
 };
