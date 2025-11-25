@@ -1,0 +1,21 @@
+{
+  "short_name": "Bastard_Wears",
+  "name": "Bastard Wears E-commerce Store",
+  "icons": [
+    {
+      "src": "bastard.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "Bastard.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "description": "Premium streetwear and fashion e-commerce store"
+}

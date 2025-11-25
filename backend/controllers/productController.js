@@ -88,6 +88,20 @@ exports.getProduct = async (req, res, next) => {
 // @access  Private/Admin
 exports.createProduct = async (req, res, next) => {
   try {
+    const { name } = req.body;
+    
+    // Check for duplicate product name
+    const existingProduct = await Product.findOne({ 
+      name: { $regex: new RegExp(`^${name}$`, 'i') } 
+    });
+    
+    if (existingProduct) {
+      return res.status(400).json({
+        success: false,
+        message: `Product "${name}" already exists. Please use a different name.`,
+      });
+    }
+    
     const product = await Product.create(req.body);
     
     res.status(201).json({
@@ -95,6 +109,13 @@ exports.createProduct = async (req, res, next) => {
       product,
     });
   } catch (error) {
+    // Handle mongoose duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'A product with this name already exists',
+      });
+    }
     next(error);
   }
 };

@@ -36,6 +36,7 @@ folder frontend
   folder public
     folder assets
     file Bastard.png
+    file bastard.svg
     folder images
       file barbie.jpg
       file unisex.jpg

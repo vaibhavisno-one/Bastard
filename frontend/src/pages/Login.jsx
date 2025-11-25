@@ -1,7 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { IoMdCheckmark } from "react-icons/io";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { toast } from "react-toastify";
 import API from "../api/client";
 import { AuthContext } from "../context/AuthContext";
@@ -16,23 +17,40 @@ const AnimatedInputWithCheck = ({
   required,
   placeholder,
   showCheck = false,
+  isPassword = false,
+  showPassword,
+  togglePassword,
 }) => {
   const circleLength = 2 * Math.PI * 30;
+  
   return (
     <motion.div className="animated-input-box">
       <label>{label}</label>
       <div className="input-with-check">
         <motion.input
-          type={type}
+          type={isPassword ? (showPassword ? "text" : "password") : type}
           name={name}
           value={value}
           onChange={onChange}
           required={required}
           placeholder={placeholder}
           className="animated-input"
+          style={{ paddingRight: isPassword ? '45px' : '12px' }}
           whileFocus={{ scale: 1.02 }}
         />
-        {showCheck && (
+        
+        {isPassword && (
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={togglePassword}
+            tabIndex="-1"
+          >
+            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+          </button>
+        )}
+        
+        {showCheck && !isPassword && (
           <motion.svg width="24" height="24" className="check-svg">
             <motion.circle
               cx="12"
@@ -75,6 +93,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [showNameCheck, setShowNameCheck] = useState(false);
   const [showPassCheck, setShowPassCheck] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -108,6 +127,10 @@ const Login = () => {
 
   const handleGoogle = () => {
     window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -151,13 +174,21 @@ const Login = () => {
           <AnimatedInputWithCheck
             label="Password"
             name="password"
-            type="password"
             value={formData.password}
             onChange={handleChange}
             required
-            placeholder="Password"
+            placeholder="Password (min 6 characters)"
             showCheck={showPassCheck}
+            isPassword={true}
+            showPassword={showPassword}
+            togglePassword={togglePasswordVisibility}
           />
+
+          {isLogin && (
+            <div className="forgot-password-link">
+              <Link to="/forgot-password">Forgot Password?</Link>
+            </div>
+          )}
 
           <motion.button
             className="primary-btn"
@@ -188,6 +219,7 @@ const Login = () => {
               setIsLogin(!isLogin);
               setShowNameCheck(false);
               setShowPassCheck(false);
+              setShowPassword(false);
               setFormData({ name: "", email: "", password: "" });
             }}
             className="toggle-btn"
@@ -198,10 +230,6 @@ const Login = () => {
 
         <Link to="/admin/login" className="admin-link">
           Admin Login
-        </Link>
-
-        <Link to="/forgot-password" className="admin-link">
-          Forgot PassWord?
         </Link>
       </motion.div>
     </div>

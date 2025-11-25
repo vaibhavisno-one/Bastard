@@ -89,7 +89,7 @@ exports.verifyPayment = async (req, res, next) => {
       });
     }
 
-    // Get payment status from Cashfree
+    // Get payment status from Cashfree with timeout
     const response = await axios.get(
       `${CASHFREE_API_URL}/orders/${orderId}`,
       {
@@ -99,16 +99,31 @@ exports.verifyPayment = async (req, res, next) => {
           'x-client-secret': CASHFREE_SECRET_KEY,
           'x-api-version': '2023-08-01',
         },
+        timeout: 10000, // 10 second timeout
       }
     );
 
     const paymentStatus = response.data.order_status;
+    const paymentData = response.data;
 
     if (paymentStatus === 'PAID') {
       res.status(200).json({
         success: true,
         verified: true,
-        payment: response.data,
+        payment: {
+          cf_payment_id: paymentData.cf_order_id || paymentData.order_id,
+          payment_id: paymentData.order_id,
+          payment_method: paymentData.payment_method || 'Online',
+          order_status: paymentStatus,
+        },
+      });
+    } else if (paymentStatus === 'ACTIVE') {
+      // Payment in progress
+      res.status(200).json({
+        success: false,
+        verified: false,
+        status: 'PENDING',
+        message: 'Payment is still being processed',
       });
     } else {
       res.status(200).json({
@@ -119,7 +134,16 @@ exports.verifyPayment = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error('Payment Verification Error:', error.response?.data || error.message);
+    console.error('Payment Verification Error:', error.message);
+    
+    // Handle timeout
+    if (error.code === 'ECONNABORTED') {
+      return res.status(408).json({
+        success: false,
+        message: 'Payment verification timeout. Please try again.',
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Failed to verify payment',
