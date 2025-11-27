@@ -6,16 +6,16 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-container">
-        
+
         {/* LEFT SIDE */}
         <div className="footer-left">
           <div className="footer-logo">
             <img
-          src="/Bastard.png"
-          alt="Bastard Logo"
-          height={64}
-          className="logo h-12 w-auto object-contain"
-        />
+              src="/Bastard.png"
+              alt="Bastard Logo"
+              height={64}
+              className="logo h-12 w-auto object-contain"
+            />
             <h2>bastard_wears</h2>
           </div>
 
@@ -42,13 +42,12 @@ const Footer = () => {
             <h4>Support</h4>
             <Link to="/contact">Contact</Link>
             <Link to="/faq">FAQ</Link>
-            <Link to="/track-order">Track Order</Link>
           </div>
 
           <div className="footer-col">
             <h4>Company</h4>
             <Link to="/about">About Us</Link>
-            <Link to="/careers">Careers</Link>
+            <Link to="/team">Our Team</Link>
             <Link to="/profile">My Account</Link>
           </div>
 
@@ -56,13 +55,14 @@ const Footer = () => {
             <h4>Legal</h4>
             <Link to="/privacy-policy">Privacy</Link>
             <Link to="/terms">Terms</Link>
-            <Link to="/returns">Returns</Link>
+            <Link to="/refund-policy">Refund Policy</Link>
           </div>
 
         </div>
       </div>
 
       <div className="footer-bottom">
+        <div className="legal-entity">Legal Entity: SAKET RANJAN</div>
         © {new Date().getFullYear()} bastard_wears. All rights reserved.
       </div>
     </footer>

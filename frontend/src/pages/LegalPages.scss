@@ -1,0 +1,116 @@
+.legal-page {
+    padding: 4rem 0;
+    background: #fff;
+    min-height: 80vh;
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 2rem;
+
+        @media (max-width: 768px) {
+            padding: 0 1rem;
+        }
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        color: #111;
+        text-align: center;
+    }
+
+    .content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #444;
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: #222;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: #333;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+
+            li {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        address {
+            font-style: normal;
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    /* Contact Page Specifics */
+    .contact-details {
+        background: #f9f9f9;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 3rem;
+    }
+
+    .contact-form-placeholder {
+        margin-top: 3rem;
+
+        .form-group {
+            margin-bottom: 1.5rem;
+
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+            }
+
+            input,
+            textarea {
+                width: 100%;
+                padding: 0.8rem;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 1rem;
+            }
+        }
+
+        .submit-btn {
+            padding: 1rem 2rem;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+
+            &:hover {
+                background: #333;
+            }
+        }
+    }
+}
