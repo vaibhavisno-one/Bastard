@@ -41,16 +41,16 @@
       text-decoration: none;
       letter-spacing: 0.5px;
       transition: transform 0.3s ease, color 0.3s ease;
-      
+
 
       span {
         color: #000;
       }
 
-      :hover{
+      :hover {
         cursor: pointer;
         transform: scale(1.01);
-        
+
       }
     }
 
@@ -108,10 +108,33 @@
             font-size: 0.75rem;
             white-space: nowrap;
             animation: fadeIn 0.2s ease;
+            pointer-events: none;
 
             @media (max-width: 768px) {
               display: none;
             }
+          }
+        }
+
+        &.active {
+          color: #F04676;
+          transform: scale(1.1);
+        }
+
+        &.active {
+          color: #F04676;
+          /* Active color */
+
+          &::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background-color: #F04676;
+            border-radius: 50%;
           }
         }
 
@@ -240,7 +263,7 @@
 
   // Shipping Banner
   .shipping-banner {
-    background: linear-gradient(135deg, #F04676 0%, #DB234E 50%,#d68195 );
+    background: linear-gradient(135deg, #F04676 0%, #DB234E 50%, #d68195);
     color: #fff;
     text-align: center;
 
@@ -261,6 +284,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -271,6 +295,7 @@
     transform: translateY(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;

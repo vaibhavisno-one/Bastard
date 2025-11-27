@@ -22,7 +22,7 @@ const AnimatedInputWithCheck = ({
   togglePassword,
 }) => {
   const circleLength = 2 * Math.PI * 30;
-  
+
   return (
     <motion.div className="animated-input-box">
       <label>{label}</label>
@@ -38,7 +38,7 @@ const AnimatedInputWithCheck = ({
           style={{ paddingRight: isPassword ? '45px' : '12px' }}
           whileFocus={{ scale: 1.02 }}
         />
-        
+
         {isPassword && (
           <button
             type="button"
@@ -49,7 +49,7 @@ const AnimatedInputWithCheck = ({
             {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
           </button>
         )}
-        
+
         {showCheck && !isPassword && (
           <motion.svg width="24" height="24" className="check-svg">
             <motion.circle
@@ -134,104 +134,125 @@ const Login = () => {
   };
 
   return (
-    <div className="animated-login-page">
-      <motion.div
-        className="animated-card"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="title">{isLogin ? "Welcome Back" : "Create Account"}</h2>
-        <p className="subtitle">
-          {isLogin ? "Login to continue" : "Sign up to begin"}
-        </p>
-
-        <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <AnimatedInputWithCheck
-              label="Name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              required={!isLogin}
-              placeholder="Your full name"
-              showCheck={showNameCheck}
-            />
-          )}
-
-          <AnimatedInputWithCheck
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            placeholder="Email address"
-            showCheck={false}
-          />
-
-          <AnimatedInputWithCheck
-            label="Password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            placeholder="Password (min 6 characters)"
-            showCheck={showPassCheck}
-            isPassword={true}
-            showPassword={showPassword}
-            togglePassword={togglePasswordVisibility}
-          />
-
-          {isLogin && (
-            <div className="forgot-password-link">
-              <Link to="/forgot-password">Forgot Password?</Link>
-            </div>
-          )}
-
-          <motion.button
-            className="primary-btn"
-            type="submit"
-            whileTap={{ scale: 0.97 }}
-          >
-            {isLogin ? "Login" : "Sign Up"}
-          </motion.button>
-        </form>
-
-        <div className="divider">
-          <span>OR</span>
-        </div>
-
-        <motion.button
-          className="google-btn"
-          onClick={handleGoogle}
-          whileTap={{ scale: 0.97 }}
+    <div className="auth-container">
+      <div className="auth-wrapper">
+        {/* Left Side - Visual */}
+        <motion.div
+          className="auth-visual"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-          Continue with Google
-        </motion.button>
+          <div className="visual-content">
+            <h1>Welcome to <br /><span>Bastard</span></h1>
+            <p>Discover the latest trends and exclusive collections.</p>
+            <div className="visual-decoration"></div>
+          </div>
+        </motion.div>
 
-        <p className="bottom-text">
-          {isLogin ? "No account? " : "Have an account? "}
-          <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setShowNameCheck(false);
-              setShowPassCheck(false);
-              setShowPassword(false);
-              setFormData({ name: "", email: "", password: "" });
-            }}
-            className="toggle-btn"
-          >
-            {isLogin ? "Sign Up" : "Login"}
-          </button>
-        </p>
+        {/* Right Side - Form */}
+        <motion.div
+          className="auth-form-container"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="form-content">
+            <h2 className="title">{isLogin ? "Welcome Back!" : "Create Account"}</h2>
+            <p className="subtitle">
+              {isLogin ? "Please login to your account" : "Get started with your free account"}
+            </p>
 
-        <Link to="/admin/login" className="admin-link">
-          Admin Login
-        </Link>
-      </motion.div>
+            <form onSubmit={handleSubmit}>
+              {!isLogin && (
+                <AnimatedInputWithCheck
+                  label="Full Name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required={!isLogin}
+                  placeholder="John Doe"
+                  showCheck={showNameCheck}
+                />
+              )}
+
+              <AnimatedInputWithCheck
+                label="Email Address"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="john@example.com"
+                showCheck={false}
+              />
+
+              <AnimatedInputWithCheck
+                label="Password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="••••••••"
+                showCheck={showPassCheck}
+                isPassword={true}
+                showPassword={showPassword}
+                togglePassword={togglePasswordVisibility}
+              />
+
+              {isLogin && (
+                <div className="forgot-password-link">
+                  <Link to="/forgot-password">Forgot Password?</Link>
+                </div>
+              )}
+
+              <motion.button
+                className="primary-btn"
+                type="submit"
+                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                {isLogin ? "Sign In" : "Sign Up"}
+              </motion.button>
+            </form>
+
+            <div className="divider">
+              <span>OR CONTINUE WITH</span>
+            </div>
+
+            <motion.button
+              className="google-btn"
+              onClick={handleGoogle}
+              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+              Google
+            </motion.button>
+
+            <p className="bottom-text">
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <button
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setShowNameCheck(false);
+                  setShowPassCheck(false);
+                  setShowPassword(false);
+                  setFormData({ name: "", email: "", password: "" });
+                }}
+                className="toggle-btn"
+              >
+                {isLogin ? "Sign Up" : "Login"}
+              </button>
+            </p>
+
+            {/* <Link to="/admin/login" className="admin-link">
+              Admin Access
+            </Link> */}
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };

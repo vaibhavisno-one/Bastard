@@ -51,7 +51,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:resetToken" element={<ResetPassword />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
+                {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
                 
                 <Route
                   path="/checkout"

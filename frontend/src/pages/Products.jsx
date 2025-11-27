@@ -16,6 +16,8 @@ const Products = () => {
     sort: searchParams.get('sort') || '',
   });
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   // Update filters when URL params change (e.g., clicking from home page)
   useEffect(() => {
     const newFilters = {
@@ -84,47 +86,69 @@ const Products = () => {
   return (
     <div className="products-page">
       <div className="container">
-        <div className="page-header">
+        <div className="products-header-actions">
           <h1 className="page-title">
-            {filters.category ? `${filters.category}s` : 'Our Products'}
+            {filters.category ? `${filters.category}s` : 'All Products'}
           </h1>
-          {getActiveFilterCount() > 0 && (
-            <p className="filter-count">
-              {getActiveFilterCount()} filter{getActiveFilterCount() > 1 ? 's' : ''} applied
-            </p>
-          )}
+
+          <div className="header-controls">
+            <button
+              className="filter-toggle-btn"
+              onClick={() => setIsFilterOpen(true)}
+            >
+              <span className="icon">⚡</span> Filters
+              {getActiveFilterCount() > 0 && (
+                <span className="badge">{getActiveFilterCount()}</span>
+              )}
+            </button>
+
+            <div className="sort-dropdown">
+              <select
+                value={filters.sort}
+                onChange={(e) => handleFilterChange('sort', e.target.value)}
+              >
+                <option value="">Sort by: Latest</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div className="products-layout">
-          <aside className="filters">
-            <div className="filters-header">
-              <h3>Filters</h3>
-              {getActiveFilterCount() > 0 && (
-                <button className="clear-all-link" onClick={clearFilters}>
-                  Clear All
-                </button>
-              )}
-            </div>
+        {/* Filter Drawer Overlay */}
+        <div className={`filter-overlay ${isFilterOpen ? 'open' : ''}`} onClick={() => setIsFilterOpen(false)}></div>
 
+        {/* Filter Drawer */}
+        <aside className={`filter-drawer ${isFilterOpen ? 'open' : ''}`}>
+          <div className="drawer-header">
+            <h3>Filter Products</h3>
+            <button className="close-btn" onClick={() => setIsFilterOpen(false)}>×</button>
+          </div>
+
+          <div className="drawer-content">
             <div className="filter-group">
               <label>Category</label>
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange('category', e.target.value)}
-              >
-                <option value="">All Categories</option>
-                <option value="T-Shirt">T-Shirts</option>
-                <option value="Hoodie">Hoodies</option>
-              </select>
+              <div className="category-pills">
+                {['T-Shirt', 'Hoodie', 'Jacket', 'Accessories'].map(cat => (
+                  <button
+                    key={cat}
+                    className={`pill ${filters.category === cat ? 'active' : ''}`}
+                    onClick={() => handleFilterChange('category', filters.category === cat ? '' : cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="filter-group">
               <label>Size</label>
-              <div className="size-buttons">
+              <div className="size-grid">
                 {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(size => (
                   <button
                     key={size}
-                    className={`size-btn ${filters.size === size ? 'active' : ''}`}
+                    className={`size-box ${filters.size === size ? 'active' : ''}`}
                     onClick={() => handleFilterChange('size', filters.size === size ? '' : size)}
                   >
                     {size}
@@ -135,91 +159,77 @@ const Products = () => {
 
             <div className="filter-group">
               <label>Price Range</label>
-              <div className="price-inputs">
+              <div className="price-range">
                 <input
                   type="number"
-                  placeholder="Min"
+                  placeholder="Min ₹"
                   value={filters.minPrice}
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                 />
-                <span>-</span>
+                <span className="separator">-</span>
                 <input
                   type="number"
-                  placeholder="Max"
+                  placeholder="Max ₹"
                   value={filters.maxPrice}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                 />
               </div>
             </div>
-
-            <div className="filter-group">
-              <label>Sort By</label>
-              <select
-                value={filters.sort}
-                onChange={(e) => handleFilterChange('sort', e.target.value)}
-              >
-                <option value="">Latest</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-              </select>
-            </div>
-
-            <button className="clear-filters" onClick={clearFilters}>
-              Clear All Filters
-            </button>
-          </aside>
-
-          <div className="products-content">
-            {loading ? (
-              <div className="loading">
-                <div className="spinner"></div>
-                <p>Loading products...</p>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="no-products">
-                <p>No products found</p>
-                <button onClick={clearFilters} className="clear-btn">
-                  Clear Filters
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="products-header">
-                  <p className="products-count">
-                    Showing {products.length} product{products.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-                <div className="product-grid">
-                  {products.map(product => (
-                    <Link
-                      to={`/products/${product._id}`}
-                      key={product._id}
-                      className="product-card"
-                    >
-                      <div className="product-image">
-                        {product.images && product.images[0] ? (
-                          <img src={product.images[0]} alt={product.name} loading="lazy" />
-                        ) : (
-                          <div className="image-placeholder">{product.name[0]}</div>
-                        )}
-                        {product.rating > 0 && (
-                          <div className="rating-badge">
-                            ★ {product.rating.toFixed(1)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="product-info">
-                        <h3>{product.name}</h3>
-                        <p className="product-category">{product.category}</p>
-                        <p className="product-price">₹{product.price.toLocaleString('en-IN')}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </>
-            )}
           </div>
+
+          <div className="drawer-footer">
+            <button className="clear-btn" onClick={clearFilters}>Clear All</button>
+            <button className="apply-btn" onClick={() => setIsFilterOpen(false)}>Show Results</button>
+          </div>
+        </aside>
+
+        <div className="products-grid-container">
+          {products.length === 0 ? (
+            <div className="no-products">
+              <div className="empty-state-icon">🔍</div>
+              <h3>No products found</h3>
+              <p>Try adjusting your filters or search criteria</p>
+              <button onClick={clearFilters} className="reset-btn">
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <>
+              <p className="results-count">Showing {products.length} results</p>
+              <div className="product-grid">
+                {products.map(product => (
+                  <Link
+                    to={`/products/${product._id}`}
+                    key={product._id}
+                    className="product-card"
+                  >
+                    <div className="card-image">
+                      {product.images && product.images[0] ? (
+                        <img src={product.images[0]} alt={product.name} loading="lazy" />
+                      ) : (
+                        <div className="placeholder">{product.name[0]}</div>
+                      )}
+                      {product.rating > 0 && (
+                        <div className="rating-tag">
+                          ★ {product.rating.toFixed(1)}
+                        </div>
+                      )}
+                      <div className="card-overlay">
+                        <span>View Details</span>
+                      </div>
+                    </div>
+                    <div className="card-details">
+                      <div className="card-header">
+                        <h3>{product.name}</h3>
+                        <span className="price">₹{product.price.toLocaleString('en-IN')}</span>
+                      </div>
+                      <p className="category">{product.category}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
