@@ -32,6 +32,12 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Please add a product name'],
     trim: true,
   },
+  slug: {
+    type: String,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
   description: {
     type: String,
     required: [true, 'Please add a description'],
@@ -94,8 +100,43 @@ const productSchema = new mongoose.Schema({
   },
 });
 
+// Generate slug from name
+productSchema.pre('save', async function (next) {
+  // Only generate slug if name is modified or slug doesn't exist
+  if (this.isModified('name') || !this.slug) {
+    // Create base slug from name
+    let baseSlug = this.name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-')      // Replace spaces with hyphens
+      .replace(/-+/g, '-');      // Replace multiple hyphens with single hyphen
+
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Check for uniqueness and add numeric suffix if needed
+    while (true) {
+      const existingProduct = await mongoose.model('Product').findOne({
+        slug,
+        _id: { $ne: this._id } // Exclude current document
+      });
+
+      if (!existingProduct) {
+        break;
+      }
+
+      counter++;
+      slug = `${baseSlug}-${counter}`;
+    }
+
+    this.slug = slug;
+  }
+  next();
+});
+
 // Virtual for total stock
-productSchema.virtual('totalStock').get(function() {
+productSchema.virtual('totalStock').get(function () {
   return this.sizes.reduce((total, item) => total + item.stock, 0);
 });
 
