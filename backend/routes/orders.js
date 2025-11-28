@@ -4,24 +4,22 @@ const {
   createOrder,
   getMyOrders,
   getOrder,
-  addOrderReview,
   cancelOrder,
   getAllOrders,
   updateOrderStatus,
 } = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/auth');
 
-// User routes
-router.post('/', protect, createOrder);
+router.route('/')
+  .post(protect, createOrder)
+  .get(protect, adminOnly, getAllOrders);
+
 router.get('/my-orders', protect, getMyOrders);
 
-// Admin routes - must be before /:id to avoid route conflicts
-router.get('/admin/all', protect, adminOnly, getAllOrders);
-router.get('/:id', protect, getOrder);
-router.post('/:id/review', protect, addOrderReview);
-router.put('/:id/cancel', protect, cancelOrder);
+router.route('/:id')
+  .get(protect, getOrder);
 
-// Admin routes
+router.put('/:id/cancel', protect, cancelOrder);
 router.put('/:id/status', protect, adminOnly, updateOrderStatus);
 
 module.exports = router;
