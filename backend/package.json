@@ -1,7 +1,7 @@
 {
-  "name": "fashion-store-backend",
+  "name": "bastard-backend",
   "version": "2.0.0",
-  "description": "Fashion Store E-commerce Backend - Upgraded",
+  "description": "bastard Backend - Upgraded",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -317,46 +317,14 @@ exports.cancelOrder = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAllOrders = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const skip = (page - 1) * limit;
-
-    const { status, search } = req.query;
-
-    // Build query
-    let query = {};
-
-    if (status && status !== 'all') {
-      query.status = status;
-    }
-
-    if (search) {
-      query.$or = [
-        { 'customerInfo.name': { $regex: search, $options: 'i' } },
-        { 'customerInfo.email': { $regex: search, $options: 'i' } },
-        { 'customerInfo.phone': { $regex: search, $options: 'i' } },
-      ];
-    }
-
-    // Get total count for pagination
-    const total = await Order.countDocuments(query);
-
-    // Fetch orders with optimized queries
-    const orders = await Order.find(query)
+    const orders = await Order.find()
       .populate('customerId', 'name email')
-      .populate('products.productId', 'name price images')
-      .select('-__v')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(); // Convert to plain JS objects for better performance
+      .populate('products.productId')
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       count: orders.length,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
       orders,
     });
   } catch (error) {

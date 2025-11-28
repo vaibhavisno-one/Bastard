@@ -51,10 +51,11 @@ const AdminDashboard = () => {
     }
   };
 
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await API.get('/orders/admin/all?limit=100');
+      const { data } = await API.get('/orders/admin/all');
       setOrders(data.orders || []);
     } catch (error) {
       console.error('Fetch orders error:', error);
