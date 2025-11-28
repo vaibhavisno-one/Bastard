@@ -694,17 +694,17 @@ const AdminDashboard = () => {
                         <div className="info-grid">
                           <div className="info-item">
                             <span className="label">Name:</span>
-                            <span className="value">{order.customerInfo.name}</span>
+                            <span className="value">{order.customerInfo?.name || 'N/A'}</span>
                           </div>
                           <div className="info-item">
                             <span className="label">Phone:</span>
-                            <span className="value">{order.customerInfo.phone}</span>
+                            <span className="value">{order.customerInfo?.phone || 'N/A'}</span>
                           </div>
                           <div className="info-item full-width">
                             <span className="label">Address:</span>
                             <span className="value">
-                              {order.customerInfo.address.street}, {order.customerInfo.address.city},
-                              {order.customerInfo.address.state} - {order.customerInfo.address.pincode}
+                              {order.customerInfo?.address?.street || 'N/A'}, {order.customerInfo?.address?.city || 'N/A'},
+                              {order.customerInfo?.address?.state || 'N/A'} - {order.customerInfo?.address?.pincode || 'N/A'}
                             </span>
                           </div>
                         </div>
@@ -713,16 +713,16 @@ const AdminDashboard = () => {
                       <div className="order-section order-products">
                         <h4>Products Ordered</h4>
                         <div className="products-list">
-                          {order.products.map((item, index) => (
+                          {order.products?.map((item, index) => (
                             <div key={index} className="product-item">
                               <div className="product-details">
-                                <span className="product-name">{item.name}</span>
+                                <span className="product-name">{item?.name || 'Unknown Product'}</span>
                                 <span className="product-meta">
-                                  Size: {item.size} | Qty: {item.quantity}
+                                  Size: {item?.size || 'N/A'} | Qty: {item?.quantity || 0}
                                 </span>
                               </div>
                               <span className="product-price">
-                                ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                                ₹{((item?.price || 0) * (item?.quantity || 0)).toLocaleString('en-IN')}
                               </span>
                             </div>
                           ))}
