@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 import {
@@ -18,6 +18,7 @@ const Header = () => {
   const { user, logout } = useContext(AuthContext);
   const { getCartCount } = useContext(CartContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -48,7 +49,7 @@ const Header = () => {
               {/* Products Link - Replaces Search */}
               <Link
                 to="/products"
-                className="nav-icon"
+                className={`nav-icon ${location.pathname === '/products' ? 'active' : ''}`}
                 data-tooltip="Products"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -58,15 +59,27 @@ const Header = () => {
               {user ? (
                 <>
                   {user.isAdmin ? (
-                    <Link to="/admin" className="nav-icon" data-tooltip="Dashboard">
+                    <Link
+                      to="/admin"
+                      className={`nav-icon ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+                      data-tooltip="Dashboard"
+                    >
                       <MdSpaceDashboard />
                     </Link>
                   ) : (
                     <>
-                      <Link to="/orders" className="nav-icon" data-tooltip="Orders">
+                      <Link
+                        to="/orders"
+                        className={`nav-icon ${location.pathname === '/orders' ? 'active' : ''}`}
+                        data-tooltip="Orders"
+                      >
                         <FiPackage />
                       </Link>
-                      <Link to="/profile" className="nav-icon" data-tooltip="Profile">
+                      <Link
+                        to="/profile"
+                        className={`nav-icon ${location.pathname === '/profile' ? 'active' : ''}`}
+                        data-tooltip="Profile"
+                      >
                         <FiUser />
                       </Link>
                     </>
@@ -80,13 +93,21 @@ const Header = () => {
                   </button>
                 </>
               ) : (
-                <Link to="/login" className="nav-icon" data-tooltip="Login">
+                <Link
+                  to="/login"
+                  className={`nav-icon ${location.pathname === '/login' ? 'active' : ''}`}
+                  data-tooltip="Login"
+                >
                   <FiUser />
                 </Link>
               )}
 
               {!user?.isAdmin && (
-                <Link to="/cart" className="nav-icon cart-icon" data-tooltip="Cart">
+                <Link
+                  to="/cart"
+                  className={`nav-icon cart-icon ${location.pathname === '/cart' ? 'active' : ''}`}
+                  data-tooltip="Cart"
+                >
                   <FiShoppingBag />
                   {getCartCount() > 0 && (
                     <span className="cart-count">{getCartCount()}</span>
