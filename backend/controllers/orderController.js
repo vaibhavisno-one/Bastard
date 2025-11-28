@@ -35,7 +35,7 @@ exports.createOrder = async (req, res, next) => {
     // Verify stock availability and update stock
     for (let item of products) {
       const product = await Product.findById(item.productId);
-      
+
       if (!product) {
         return res.status(404).json({
           success: false,
@@ -44,7 +44,7 @@ exports.createOrder = async (req, res, next) => {
       }
 
       const sizeStock = product.sizes.find(s => s.size === item.size);
-      
+
       if (!sizeStock || sizeStock.stock < item.quantity) {
         return res.status(400).json({
           success: false,
@@ -203,7 +203,10 @@ exports.cancelOrder = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAllOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find()
+    // Only fetch orders with successful payments
+    const orders = await Order.find({
+      'paymentInfo.paymentStatus': 'Success'
+    })
       .populate('customerId', 'name email')
       .populate('products.productId')
       .sort({ createdAt: -1 });
