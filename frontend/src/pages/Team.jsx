@@ -7,17 +7,17 @@ const Team = () => {
         {
             name: "Saket Ranjan",
             role: "Founder",
-            image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Zm91bmRlciUyMHBvcnRyYWl0fGVufDB8fDB8fHww", // Placeholder
+            image: "/nanami.jpeg",
         },
         {
-            name: "Aarav Sharma",
+            name: "John Doe",
             role: "Tech Lead",
-            image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZGV2ZWxvcGVyfGVufDB8fDB8fHww", // Placeholder
+            image: "/yorolovo.jpeg",
         },
         {
-            name: "Riya Patel",
-            role: "Distribution Head",
-            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YnVzaW5lc3MlMjB3b21hbnxlbnwwfHwwfHx8MA%3D%3D", // Placeholder
+            name: "Mahak Mittal",
+            role: "Design Head",
+            image: "/powerpuff.jpeg",
         }
     ];
 

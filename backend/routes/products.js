@@ -16,20 +16,26 @@ const {
 } = require('../controllers/productController');
 const { protect, adminOnly } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
+const { cacheMiddleware } = require('../middleware/cache');
+
+// Cache durations in seconds
+const CACHE_5_MIN = 300;
+const CACHE_10_MIN = 600;
+const CACHE_15_MIN = 900;
 
 router.route('/')
-  .get(getProducts)
+  .get(cacheMiddleware(CACHE_5_MIN), getProducts)
   .post(protect, adminOnly, createProduct);
 
-router.get('/featured', getFeaturedProducts);
-router.get('/new-arrivals', getNewArrivals);
-router.get('/trending', getTrendingProducts);
-router.get('/best-sellers', getBestSellers);
+router.get('/featured', cacheMiddleware(CACHE_15_MIN), getFeaturedProducts);
+router.get('/new-arrivals', cacheMiddleware(CACHE_15_MIN), getNewArrivals);
+router.get('/trending', cacheMiddleware(CACHE_15_MIN), getTrendingProducts);
+router.get('/best-sellers', cacheMiddleware(CACHE_15_MIN), getBestSellers);
 
 router.post('/upload', protect, adminOnly, upload.array('images', 4), uploadImages);
 
 router.route('/:id')
-  .get(getProduct)
+  .get(cacheMiddleware(CACHE_10_MIN), getProduct)
   .put(protect, adminOnly, updateProduct)
   .delete(protect, adminOnly, deleteProduct);
 

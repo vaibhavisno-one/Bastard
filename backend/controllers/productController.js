@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const { clearCacheByPattern } = require('../middleware/cache');
 
 // @desc    Get all products with filters
 // @route   GET /api/products
@@ -7,10 +8,10 @@ const Order = require('../models/Order');
 exports.getProducts = async (req, res, next) => {
   try {
     const { category, size, minPrice, maxPrice, sort, search } = req.query;
-    
+
     // Build query
     let query = {};
-    
+
     // Search functionality
     if (search) {
       query.$or = [
@@ -19,24 +20,24 @@ exports.getProducts = async (req, res, next) => {
         { category: { $regex: search, $options: 'i' } },
       ];
     }
-    
+
     if (category) {
       query.category = category;
     }
-    
+
     if (size) {
       query['sizes.size'] = size;
     }
-    
+
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    
+
     // Execute query
     let productsQuery = Product.find(query);
-    
+
     // Sorting
     if (sort === 'price_asc') {
       productsQuery = productsQuery.sort({ price: 1 });
@@ -47,9 +48,9 @@ exports.getProducts = async (req, res, next) => {
     } else {
       productsQuery = productsQuery.sort({ createdAt: -1 });
     }
-    
+
     const products = await productsQuery;
-    
+
     res.status(200).json({
       success: true,
       count: products.length,
@@ -66,14 +67,14 @@ exports.getProducts = async (req, res, next) => {
 exports.getProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id).populate('reviews.user', 'name');
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-    
+
     res.status(200).json({
       success: true,
       product,
@@ -88,22 +89,11 @@ exports.getProduct = async (req, res, next) => {
 // @access  Private/Admin
 exports.createProduct = async (req, res, next) => {
   try {
-    const { name } = req.body;
-    
-    // Check for duplicate product name
-    const existingProduct = await Product.findOne({ 
-      name: { $regex: new RegExp(`^${name}$`, 'i') } 
-    });
-    
-    if (existingProduct) {
-      return res.status(400).json({
-        success: false,
-        message: `Product "${name}" already exists. Please use a different name.`,
-      });
-    }
-    
     const product = await Product.create(req.body);
-    
+
+    // Clear product-related caches
+    clearCacheByPattern('/api/products');
+
     res.status(201).json({
       success: true,
       product,
@@ -113,9 +103,19 @@ exports.createProduct = async (req, res, next) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'A product with this name already exists',
+        message: 'A product with this exact name already exists',
       });
     }
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', '),
+      });
+    }
+
     next(error);
   }
 };
@@ -126,19 +126,22 @@ exports.createProduct = async (req, res, next) => {
 exports.updateProduct = async (req, res, next) => {
   try {
     let product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-    
+
     product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    
+
+    // Clear product-related caches
+    clearCacheByPattern('/api/products');
+
     res.status(200).json({
       success: true,
       product,
@@ -154,16 +157,19 @@ exports.updateProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-    
+
     await product.deleteOne();
-    
+
+    // Clear product-related caches
+    clearCacheByPattern('/api/products');
+
     res.status(200).json({
       success: true,
       message: 'Product deleted',
@@ -179,7 +185,7 @@ exports.deleteProduct = async (req, res, next) => {
 exports.getFeaturedProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ featured: true }).limit(6);
-    
+
     res.status(200).json({
       success: true,
       count: products.length,
@@ -196,7 +202,7 @@ exports.getFeaturedProducts = async (req, res, next) => {
 exports.getNewArrivals = async (req, res, next) => {
   try {
     const products = await Product.find({ isNewArrival: true }).limit(8);
-    
+
     res.status(200).json({
       success: true,
       count: products.length,
@@ -213,7 +219,7 @@ exports.getNewArrivals = async (req, res, next) => {
 exports.getTrendingProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ isTrending: true }).limit(8);
-    
+
     res.status(200).json({
       success: true,
       count: products.length,
@@ -230,7 +236,7 @@ exports.getTrendingProducts = async (req, res, next) => {
 exports.getBestSellers = async (req, res, next) => {
   try {
     const products = await Product.find({ isBestSeller: true }).limit(8);
-    
+
     res.status(200).json({
       success: true,
       count: products.length,

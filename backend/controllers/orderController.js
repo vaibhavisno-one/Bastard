@@ -40,7 +40,7 @@ exports.createOrder = async (req, res, next) => {
 
       if (existingOrder) {
         console.log('Duplicate order attempt prevented:', paymentInfo.cashfreeOrderId);
-        
+
         // Return the existing order instead of creating duplicate
         return res.status(200).json({
           success: true,
@@ -54,7 +54,7 @@ exports.createOrder = async (req, res, next) => {
     const stockChecks = [];
     for (let item of products) {
       const product = await Product.findById(item.productId);
-      
+
       if (!product) {
         return res.status(404).json({
           success: false,
@@ -63,7 +63,7 @@ exports.createOrder = async (req, res, next) => {
       }
 
       const sizeStock = product.sizes.find(s => s.size === item.size);
-      
+
       if (!sizeStock || sizeStock.stock < item.quantity) {
         return res.status(400).json({
           success: false,
@@ -180,7 +180,7 @@ exports.getOrder = async (req, res, next) => {
 exports.addOrderReview = async (req, res, next) => {
   try {
     const { productId, rating, comment } = req.body;
-    
+
     const order = await Order.findById(req.params.id);
 
     if (!order) {
@@ -208,7 +208,7 @@ exports.addOrderReview = async (req, res, next) => {
 
     // Add review to product
     const product = await Product.findById(productId);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -317,14 +317,46 @@ exports.cancelOrder = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAllOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find()
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    const { status, search } = req.query;
+
+    // Build query
+    let query = {};
+
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    if (search) {
+      query.$or = [
+        { 'customerInfo.name': { $regex: search, $options: 'i' } },
+        { 'customerInfo.email': { $regex: search, $options: 'i' } },
+        { 'customerInfo.phone': { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    // Get total count for pagination
+    const total = await Order.countDocuments(query);
+
+    // Fetch orders with optimized queries
+    const orders = await Order.find(query)
       .populate('customerId', 'name email')
-      .populate('products.productId')
-      .sort({ createdAt: -1 });
+      .populate('products.productId', 'name price images')
+      .select('-__v')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Convert to plain JS objects for better performance
 
     res.status(200).json({
       success: true,
       count: orders.length,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
       orders,
     });
   } catch (error) {

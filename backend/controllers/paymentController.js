@@ -3,8 +3,8 @@ const crypto = require('crypto');
 const Order = require('../models/Order');
 
 // Cashfree API Configuration
-const CASHFREE_API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api.cashfree.com/pg' 
+const CASHFREE_API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.cashfree.com/pg'
   : 'https://sandbox.cashfree.com/pg';
 
 const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID;
@@ -89,61 +89,95 @@ exports.verifyPayment = async (req, res, next) => {
       });
     }
 
-    // Get payment status from Cashfree with timeout
-    const response = await axios.get(
-      `${CASHFREE_API_URL}/orders/${orderId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-client-id': CASHFREE_APP_ID,
-          'x-client-secret': CASHFREE_SECRET_KEY,
-          'x-api-version': '2023-08-01',
-        },
-        timeout: 10000, // 10 second timeout
+    // Retry configuration
+    const maxRetries = 3;
+    const baseTimeout = 5000; // 5 seconds
+    let lastError;
+
+    // Retry with exponential backoff
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const timeout = baseTimeout * attempt; // 5s, 10s, 15s
+
+        // Get payment status from Cashfree
+        const response = await axios.get(
+          `${CASHFREE_API_URL}/orders/${orderId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-client-id': CASHFREE_APP_ID,
+              'x-client-secret': CASHFREE_SECRET_KEY,
+              'x-api-version': '2023-08-01',
+            },
+            timeout,
+          }
+        );
+
+        const paymentStatus = response.data.order_status;
+        const paymentData = response.data;
+
+        if (paymentStatus === 'PAID') {
+          return res.status(200).json({
+            success: true,
+            verified: true,
+            payment: {
+              cf_payment_id: paymentData.cf_order_id || paymentData.order_id,
+              payment_id: paymentData.order_id,
+              payment_method: paymentData.payment_method || 'Online',
+              order_status: paymentStatus,
+            },
+          });
+        } else if (paymentStatus === 'ACTIVE') {
+          // Payment in progress - only retry if this is not the last attempt
+          if (attempt < maxRetries) {
+            console.log(`Payment still ACTIVE, retrying (attempt ${attempt}/${maxRetries})...`);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+            continue;
+          }
+
+          return res.status(200).json({
+            success: false,
+            verified: false,
+            status: 'PENDING',
+            message: 'Payment is still being processed',
+          });
+        } else {
+          return res.status(200).json({
+            success: false,
+            verified: false,
+            status: paymentStatus,
+            message: 'Payment verification failed',
+          });
+        }
+      } catch (error) {
+        lastError = error;
+
+        // If timeout or network error, retry
+        if ((error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') && attempt < maxRetries) {
+          console.log(`Payment verification timeout/error, retrying (attempt ${attempt}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+          continue;
+        }
+
+        // If last attempt or non-retryable error, throw
+        throw error;
       }
-    );
-
-    const paymentStatus = response.data.order_status;
-    const paymentData = response.data;
-
-    if (paymentStatus === 'PAID') {
-      res.status(200).json({
-        success: true,
-        verified: true,
-        payment: {
-          cf_payment_id: paymentData.cf_order_id || paymentData.order_id,
-          payment_id: paymentData.order_id,
-          payment_method: paymentData.payment_method || 'Online',
-          order_status: paymentStatus,
-        },
-      });
-    } else if (paymentStatus === 'ACTIVE') {
-      // Payment in progress
-      res.status(200).json({
-        success: false,
-        verified: false,
-        status: 'PENDING',
-        message: 'Payment is still being processed',
-      });
-    } else {
-      res.status(200).json({
-        success: false,
-        verified: false,
-        status: paymentStatus,
-        message: 'Payment verification failed',
-      });
     }
+
+    // If all retries failed
+    throw lastError;
+
   } catch (error) {
     console.error('Payment Verification Error:', error.message);
-    
+
     // Handle timeout
-    if (error.code === 'ECONNABORTED') {
+    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
       return res.status(408).json({
         success: false,
         message: 'Payment verification timeout. Please try again.',
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to verify payment',
@@ -177,9 +211,9 @@ exports.handleWebhook = async (req, res) => {
     // Handle payment success
     if (type === 'PAYMENT_SUCCESS_WEBHOOK') {
       const { order_id, order_amount, payment_time } = data.order;
-      
+
       console.log(`Payment successful for order: ${order_id}`);
-      
+
       // You can update order status or perform other actions here
       // This is handled in the order creation flow
     }

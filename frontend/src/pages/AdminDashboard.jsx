@@ -12,6 +12,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [productForm, setProductForm] = useState({
@@ -52,11 +53,14 @@ const AdminDashboard = () => {
 
   const fetchOrders = async () => {
     try {
-      const { data } = await API.get('/orders/admin/all');
+      setLoading(true);
+      const { data } = await API.get('/orders/admin/all?limit=100');
       setOrders(data.orders || []);
     } catch (error) {
       console.error('Fetch orders error:', error);
       toast.error(error.response?.data?.message || 'Failed to fetch orders');
+    } finally {
+      setLoading(false);
     }
   };
 
