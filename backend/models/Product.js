@@ -38,6 +38,12 @@ const productSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  sku: {
+    type: String,
+    unique: true,
+    uppercase: true,
+    trim: true,
+  },
   description: {
     type: String,
     required: [true, 'Please add a description'],
@@ -100,9 +106,9 @@ const productSchema = new mongoose.Schema({
   },
 });
 
-// Generate slug from name
+// Generate slug and SKU from name
 productSchema.pre('save', async function (next) {
-  // Only generate slug if name is modified or slug doesn't exist
+  // Generate slug if name is modified or slug doesn't exist
   if (this.isModified('name') || !this.slug) {
     // Create base slug from name
     let baseSlug = this.name
@@ -132,6 +138,33 @@ productSchema.pre('save', async function (next) {
 
     this.slug = slug;
   }
+
+  // Generate SKU if it doesn't exist
+  if (!this.sku) {
+    // Create SKU format: CATEGORY-RANDOM (e.g., TSH-A1B2C3, HOO-D4E5F6)
+    const categoryPrefix = this.category === 'T-Shirt' ? 'TSH' : 'HOO';
+
+    let sku;
+    let isUnique = false;
+
+    // Keep generating until we find a unique SKU
+    while (!isUnique) {
+      const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+      sku = `${categoryPrefix}-${randomPart}`;
+
+      const existingProduct = await mongoose.model('Product').findOne({
+        sku,
+        _id: { $ne: this._id }
+      });
+
+      if (!existingProduct) {
+        isUnique = true;
+      }
+    }
+
+    this.sku = sku;
+  }
+
   next();
 });
 
