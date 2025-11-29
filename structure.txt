@@ -1,4 +1,9 @@
 file .gitignore
+folder .idea
+  file mern-ecommerce.iml
+  file modules.xml
+  file vcs.xml
+  file workspace.xml
 file .prettierignore
 folder backend
   file .env
@@ -15,6 +20,7 @@ folder backend
     file productController.js
   folder middleware
     file auth.js
+    file cache.js
     file error.js
   folder models
     file Order.js
@@ -41,6 +47,10 @@ folder frontend
       file barbie.jpg
       file unisex.jpg
     file index.html
+    file manifest.json
+    file nanami.jpeg
+    file powerpuff.jpeg
+    file yorolovo.jpeg
   folder src
     folder api
       file client.js
@@ -61,35 +71,48 @@ folder frontend
       file Rating.scss
       file ReviewSection.jsx
       file ReviewSection.scss
+      file TiltedCard.jsx
     folder context
       file AuthContext.jsx
       file CartContext.jsx
     file index.jsx
     folder pages
+      file About.jsx
       file AdminDashboard.jsx
       file AdminDashboard.scss
       file AdminLogin.jsx
+      file BestSellers.jsx
+      file Careers.jsx
       file Cart.jsx
       file Cart.scss
       file Checkout.jsx
       file Checkout.scss
+      file Contact.jsx
+      file FAQ.jsx
       file ForgotPassword.jsx
       file ForgotPassword.scss
       file Home.jsx
       file Home.scss
+      file LegalPages.scss
       file Login.jsx
       file Login.scss
       file MyOrders.jsx
       file MyOrders.scss
+      file NewArrivals.jsx
       file PaymentCallback.jsx
       file PaymentCallback.scss
+      file PrivacyPolicy.jsx
       file ProductDetail.jsx
       file ProductDetail.scss
       file Products.jsx
       file Products.scss
       file Profile.jsx
       file Profile.scss
+      file RefundPolicy.jsx
       file ResetPassword.jsx
       file ResetPassword.scss
+      file Team.jsx
+      file Terms.jsx
+      file TrackOrder.jsx
 file README.md
 file structure.txt
