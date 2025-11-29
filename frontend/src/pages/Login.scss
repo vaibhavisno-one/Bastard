@@ -10,6 +10,8 @@
 
   @media (max-width: 768px) {
     padding: 1rem;
+    align-items: flex-start; // Align top on mobile
+    padding-top: 2rem;
   }
 }
 
@@ -26,6 +28,7 @@
   @media (max-width: 900px) {
     flex-direction: column;
     min-height: auto;
+    border-radius: 16px; // Smaller radius
   }
 }
 
@@ -107,6 +110,10 @@
   color: #111;
   margin-bottom: 0.5rem;
   text-align: center;
+
+  @media (max-width: 500px) {
+    font-size: 1.8rem;
+  }
 }
 
 .subtitle {
@@ -114,6 +121,10 @@
   color: #666;
   margin-bottom: 2.5rem;
   text-align: center;
+
+  @media (max-width: 500px) {
+    margin-bottom: 2rem;
+  }
 }
 
 .animated-input-box {
@@ -139,6 +150,11 @@
       transition: all 0.3s ease;
       background: #fcfcfc;
 
+      @media (max-width: 500px) {
+        padding: 0.8rem; // Prevent zoom
+        font-size: 16px;
+      }
+
       &:focus {
         border-color: #F04676;
         background: #fff;
@@ -157,6 +173,7 @@
       cursor: pointer;
       color: #999;
       transition: color 0.3s;
+      padding: 5px; // Increase touch target
 
       &:hover {
         color: #333;
@@ -283,6 +300,7 @@
     font-size: 0.9rem;
     text-decoration: none;
     font-weight: 500;
+    padding: 5px 0; // Increase touch target
 
     &:hover {
       color: #F04676;

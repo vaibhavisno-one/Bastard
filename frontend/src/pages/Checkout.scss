@@ -167,9 +167,11 @@
   @media (max-width: 968px) {
     .checkout-layout {
       grid-template-columns: 1fr;
+      gap: 2rem;
 
       .order-summary {
         position: static;
+        margin-bottom: 2rem;
       }
     }
   }
@@ -179,14 +181,50 @@
 
     .page-title {
       font-size: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .checkout-layout {
+      margin-top: 1rem;
+
       .checkout-form {
         padding: 1.5rem;
+        border-radius: 12px;
+
+        h3 {
+          font-size: 1.3rem;
+        }
 
         .form-row {
           grid-template-columns: 1fr;
+          gap: 0; // Reset gap since it's single column
+        }
+
+        .form-group {
+          margin-bottom: 1rem;
+
+          input {
+            padding: 0.8rem; // Slightly smaller padding
+            font-size: 16px; // Prevent zoom on iOS
+          }
+        }
+
+        .place-order-btn {
+          padding: 1rem;
+          font-size: 1.1rem;
+        }
+      }
+
+      .order-summary {
+        padding: 1.5rem;
+        border-radius: 12px;
+
+        h3 {
+          font-size: 1.3rem;
+        }
+
+        .summary-items {
+          max-height: 250px;
         }
       }
     }
@@ -197,6 +235,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

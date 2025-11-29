@@ -4,6 +4,10 @@
   color: #030303;
   padding: 60px 0 30px;
   display: block !important; // prevents flex inheritance from parent
+
+  @media (max-width: 768px) {
+    padding: 40px 0 20px;
+  }
 }
 
 .footer-container {
@@ -21,6 +25,11 @@
   @media (max-width: 900px) {
     flex-direction: column;
     gap: 40px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 20px;
+    gap: 30px;
   }
 }
 
@@ -71,6 +80,11 @@
     width: 100%;
     gap: 40px;
   }
+
+  @media (max-width: 600px) {
+    gap: 30px;
+    justify-content: space-between;
+  }
 }
 
 /* INDIVIDUAL COLUMN */
@@ -79,6 +93,10 @@
   flex-direction: column;
   gap: 8px;
   min-width: 140px;
+
+  @media (max-width: 600px) {
+    min-width: 45%; // Allow 2 columns on mobile
+  }
 
   h4 {
     color: #121212;
@@ -91,6 +109,7 @@
     color: #111010e3;
     font-size: 14px;
     transition: 0.2s;
+    padding: 2px 0; // Increase touch target
 
     &:hover {
       color: #b32525;
@@ -106,6 +125,10 @@
   margin-top: 50px;
   padding-top: 20px;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    margin-top: 30px;
+  }
 
   .legal-entity {
     margin-bottom: 8px;

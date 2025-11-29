@@ -280,35 +280,87 @@
   }
 
   @media (max-width: 768px) {
+    padding: 2rem 0; // Reduced padding
+
+    .page-title {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      padding: 0 1rem;
+    }
+
     .cart-layout {
+      gap: 2rem;
+
       .cart-items {
         .cart-item {
           grid-template-columns: 80px 1fr;
           gap: 1rem;
           padding: 1rem;
+          position: relative; // For absolute positioning of remove button
 
           .item-image {
             width: 80px;
             height: 80px;
           }
 
+          .item-details {
+            padding-right: 2rem; // Space for remove button
+
+            h3 {
+              font-size: 1rem;
+              margin-bottom: 0.3rem;
+            }
+          }
+
           .item-quantity {
             grid-column: 1 / -1;
-            justify-content: center;
-            width: fit-content;
-            margin: 0 auto;
+            justify-content: space-between; // Spread out controls
+            width: 100%; // Full width
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+
+            button {
+              width: 40px;
+              height: 40px; // Larger touch target
+            }
           }
 
           .item-total {
             grid-column: 1 / -1;
-            text-align: center;
+            text-align: right;
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
           }
 
           .remove-btn {
             position: absolute;
             top: 10px;
             right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
           }
+        }
+      }
+
+      .cart-summary {
+        position: static; // Remove sticky on mobile
+        margin: 0 1rem;
+        padding: 1.5rem;
+        border-radius: 16px;
+
+        h3 {
+          font-size: 1.3rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .checkout-btn {
+          position: sticky;
+          bottom: 1rem;
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+          z-index: 100;
         }
       }
     }

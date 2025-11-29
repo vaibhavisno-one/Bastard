@@ -17,10 +17,18 @@
   .hero-image-grid {
     padding: 3rem 0;
 
+    @media (max-width: 768px) {
+      padding: 1.5rem 0;
+    }
+
     .grid-layout {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+
+      @media (max-width: 768px) {
+        gap: 1rem;
+      }
 
       .grid-item {
         position: relative;
@@ -60,6 +68,10 @@
             padding: 2rem;
             color: #fff;
             z-index: 2;
+
+            @media (max-width: 768px) {
+              padding: 1.5rem;
+            }
           }
         }
 
@@ -83,16 +95,24 @@
         grid-template-columns: 1fr 1fr;
         gap: 1.5rem;
 
+        @media (max-width: 768px) {
+          gap: 1rem;
+        }
+
         .small {
           height: 550px;
 
           @media (max-width: 768px) {
-            height: 200px;
+            height: 250px;
           }
         }
 
         @media (max-width: 640px) {
           grid-template-columns: 1fr;
+
+          .small {
+            height: 200px;
+          }
         }
       }
     }
@@ -157,6 +177,8 @@
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
   }
 
   .category-item {
@@ -167,6 +189,10 @@
       height: 300px;
       border-radius: 12px;
       overflow: hidden;
+
+      @media (max-width: 768px) {
+        height: 200px;
+      }
 
       img {
         width: 100%;
@@ -193,10 +219,18 @@
         color: #fff;
         z-index: 2;
 
+        @media (max-width: 768px) {
+          padding: 1.5rem;
+        }
+
         h3 {
           font-size: 1.6rem;
           font-weight: 700;
           margin-bottom: 0.5rem;
+
+          @media (max-width: 768px) {
+            font-size: 1.4rem;
+          }
         }
 
         span {
@@ -230,6 +264,10 @@
 .products-section {
   padding: 3rem 0;
 
+  @media (max-width: 768px) {
+    padding: 2rem 0;
+  }
+
   &.alt-bg {
     background: #f8f8f8;
   }
@@ -245,6 +283,10 @@
       font-weight: 800;
       letter-spacing: 1px;
       color: #000;
+
+      @media (max-width: 768px) {
+        font-size: 1.4rem;
+      }
     }
 
     .view-all {
@@ -267,15 +309,27 @@
 .featured-grid {
   padding: 3rem 0;
 
+  @media (max-width: 768px) {
+    padding: 2rem 0;
+  }
+
   .section-header {
     text-align: center;
     margin-bottom: 3rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 2rem;
+    }
 
     h2 {
       font-size: 1.6rem;
       font-weight: 800;
       letter-spacing: 1px;
       color: #000;
+
+      @media (max-width: 768px) {
+        font-size: 1.4rem;
+      }
     }
   }
 
@@ -287,6 +341,10 @@
     @media (max-width: 640px) {
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
+    }
+
+    @media (max-width: 400px) {
+      grid-template-columns: 1fr; // Fallback for very small screens
     }
 
     .product-card {
@@ -346,6 +404,10 @@
 
       .product-info {
         padding: 1rem;
+
+        @media (max-width: 640px) {
+          padding: 0.8rem;
+        }
 
         h3 {
           font-size: 0.95rem;
