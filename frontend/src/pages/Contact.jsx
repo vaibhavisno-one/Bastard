@@ -12,12 +12,12 @@ const Contact = () => {
                     <div className="contact-details">
                         <h3>Get in Touch</h3>
                         <p><strong>Legal Entity Name:</strong> SAKET RANJAN</p>
-                        <p><strong>Email:</strong> support@bastardwears.com</p>
-                        <p><strong>Phone:</strong> +91 98765 43210</p>
+                        <p><strong>Email:</strong> bastardwears@gmail.com</p>
+                        <p><strong>Phone:</strong> +91 6205738409</p>
                         <p><strong>Operating Address:</strong></p>
                         <address>
-                            123 Street Name,<br />
-                            City, State, Zip Code,<br />
+                            GLA University<br />
+                            Mathura, 281406<br />
                             India
                         </address>
                     </div>

@@ -30,7 +30,7 @@ const RefundPolicy = () => {
                     <h2>Contact Us</h2>
                     <p>If you have any questions about our Returns and Refunds Policy, please contact us:</p>
                     <ul>
-                        <li>By email: support@bastardwears.com</li>
+                        <li>By email: bastardwears@gmail.com</li>
                     </ul>
                 </div>
             </div>

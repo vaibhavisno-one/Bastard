@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
                         <li><strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.</li>
                         <li><strong>Company</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to SAKET RANJAN.</li>
                         <li><strong>Service</strong> refers to the Website.</li>
-                        <li><strong>Website</strong> refers to bastard_wears, accessible from https://bastardwears.com</li>
+                        <li><strong>Website</strong> refers to bastard_wears, accessible from https://bastard.fun</li>
                     </ul>
 
                     <h2>Collecting and Using Your Personal Data</h2>
@@ -38,7 +38,7 @@ const PrivacyPolicy = () => {
                     <h2>Contact Us</h2>
                     <p>If you have any questions about this Privacy Policy, You can contact us:</p>
                     <ul>
-                        <li>By email: support@bastardwears.com</li>
+                        <li>By email: bastardwears@gmail.com</li>
                     </ul>
                 </div>
             </div>

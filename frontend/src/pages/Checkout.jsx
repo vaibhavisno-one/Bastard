@@ -54,7 +54,7 @@ const Checkout = () => {
     sessionStorage.setItem('paymentProcessing', 'true');
 
     try {
-      const totalAmount = getCartTotal();
+      const totalAmount = getCartTotal() + 69;
 
       // Validate cart has items
       if (!cart || cart.length === 0) {
@@ -275,7 +275,7 @@ const Checkout = () => {
             </div>
 
             <button type="submit" className="place-order-btn" disabled={loading}>
-              {loading ? 'Processing...' : `Pay ₹${(getCartTotal() ).toLocaleString('en-IN')}`}
+              {loading ? 'Processing...' : `Pay ₹${(getCartTotal() + 69).toLocaleString('en-IN')}`}
             </button>
           </form>
 
@@ -303,7 +303,7 @@ const Checkout = () => {
               </div>
               <div className="summary-row total">
                 <span>Total:</span>
-                <span>₹{(getCartTotal() ).toLocaleString('en-IN')}</span>
+                <span>₹{(getCartTotal() + 69).toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
