@@ -69,14 +69,23 @@ exports.createOrder = async (req, res, next) => {
     // Populate product details
     await order.populate('products.productId');
 
-    // Send confirmation emails
-    try {
-      await sendOrderConfirmation(order, req.user.email);
-      await sendAdminOrderNotification(order);
-    } catch (emailError) {
-      console.error('Email sending failed:', emailError);
-      // Don't fail the order if email fails
-    }
+    // Send confirmation emails asynchronously (non-blocking)
+    // This ensures order creation isn't delayed by email sending
+    setImmediate(async () => {
+      try {
+        await sendOrderConfirmation(order, req.user.email);
+        console.log(`Order confirmation email sent for order #${order._id.toString().slice(-6)}`);
+      } catch (emailError) {
+        console.error('Customer email sending failed:', emailError.message);
+      }
+
+      try {
+        await sendAdminOrderNotification(order);
+        console.log(`Admin notification email sent for order #${order._id.toString().slice(-6)}`);
+      } catch (emailError) {
+        console.error('Admin email sending failed:', emailError.message);
+      }
+    });
 
     // Emit order update via socket
     if (global.emitOrderUpdate) {

@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter
+// Create transporter with timeout and pooling configuration
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
@@ -9,7 +9,42 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  // Timeout settings to prevent hanging connections
+  connectionTimeout: 10000, // 10 seconds - fail fast if can't connect
+  greetingTimeout: 5000, // 5 seconds for SMTP greeting
+  socketTimeout: 30000, // 30 seconds for socket operations
+  // Connection pooling for better performance
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  // Retry on temporary errors
+  tls: {
+    rejectUnauthorized: false, // Allow self-signed certificates if needed
+  },
 });
+
+// Helper function to send email with retry logic
+const sendEmailWithRetry = async (mailOptions, maxRetries = 3) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`Email sent successfully on attempt ${attempt}:`, info.messageId);
+      return info;
+    } catch (error) {
+      console.error(`Email sending failed (attempt ${attempt}/${maxRetries}):`, error.message);
+
+      // If this was the last attempt, throw the error
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      // Wait before retrying with exponential backoff: 1s, 2s, 4s
+      const delay = Math.pow(2, attempt - 1) * 1000;
+      console.log(`Retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
 
 // Send order confirmation email
 const sendOrderConfirmation = async (order, customerEmail) => {
@@ -50,7 +85,7 @@ const sendOrderConfirmation = async (order, customerEmail) => {
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">FASHION STORE</h1>
+                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Bastard</h1>
                     <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px;">Order Confirmation</p>
                   </td>
                 </tr>
@@ -139,7 +174,7 @@ const sendOrderConfirmation = async (order, customerEmail) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 };
 
 // Send order notification to admin
@@ -189,7 +224,7 @@ const sendAdminOrderNotification = async (order) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 };
 
 // Send password reset email
@@ -240,7 +275,7 @@ const sendPasswordResetEmail = async (email, resetToken) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await sendEmailWithRetry(mailOptions);
 };
 
 module.exports = {
