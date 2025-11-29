@@ -7,18 +7,24 @@ const Team = () => {
         {
             name: "Saket Ranjan",
             role: "Founder",
-            image: "/nanami.jpeg",
+            image: "/Founder.jpg",
         },
         {
-            name: "John Doe",
-            role: "Tech Lead",
-            image: "/yorolovo.jpeg",
+            name: "Suryansh Pathak",
+            role: "Distribution Head",
+            image: "/Distribution.jpg",
         },
         {
             name: "Mahak Mittal",
             role: "Design Head",
-            image: "/powerpuff.jpeg",
+            image: "/DesignLead.jpg",
+        },
+        {
+            name: "Vaibhav Kumar",
+            role: "Tech Lead",
+            image: "/yorolovo.jpeg",
         }
+
     ];
 
     return (

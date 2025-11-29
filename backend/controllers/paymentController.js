@@ -89,15 +89,15 @@ exports.verifyPayment = async (req, res, next) => {
       });
     }
 
-    // Retry configuration
+    // Retry configuration - optimized for production performance
     const maxRetries = 3;
-    const baseTimeout = 5000; // 5 seconds
+    const baseTimeout = 3000; // 3 seconds - reduced from 5s for faster response
     let lastError;
 
-    // Retry with exponential backoff
+    // Retry with consistent timeout (not exponential)
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const timeout = baseTimeout * attempt; // 5s, 10s, 15s
+        const timeout = baseTimeout; // Consistent 3s timeout for all attempts
 
         // Get payment status from Cashfree
         const response = await axios.get(
@@ -131,7 +131,7 @@ exports.verifyPayment = async (req, res, next) => {
           // Payment in progress - only retry if this is not the last attempt
           if (attempt < maxRetries) {
             console.log(`Payment still ACTIVE, retrying (attempt ${attempt}/${maxRetries})...`);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry (reduced from 2s)
             continue;
           }
 
@@ -155,7 +155,7 @@ exports.verifyPayment = async (req, res, next) => {
         // If timeout or network error, retry
         if ((error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') && attempt < maxRetries) {
           console.log(`Payment verification timeout/error, retrying (attempt ${attempt}/${maxRetries})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 500 * attempt)); // Faster backoff: 500ms, 1s, 1.5s
           continue;
         }
 
