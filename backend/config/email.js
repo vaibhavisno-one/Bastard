@@ -1,35 +1,15 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-// Create transporter with timeout and pooling configuration
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // Timeout settings to prevent hanging connections
-  connectionTimeout: 10000, // 10 seconds - fail fast if can't connect
-  greetingTimeout: 5000, // 5 seconds for SMTP greeting
-  socketTimeout: 30000, // 30 seconds for socket operations
-  // Connection pooling for better performance
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  // Retry on temporary errors
-  tls: {
-    rejectUnauthorized: false, // Allow self-signed certificates if needed
-  },
-});
+// Configure SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Helper function to send email with retry logic
 const sendEmailWithRetry = async (mailOptions, maxRetries = 3) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const info = await transporter.sendMail(mailOptions);
-      console.log(`Email sent successfully on attempt ${attempt}:`, info.messageId);
-      return info;
+      const result = await sgMail.send(mailOptions);
+      console.log(`Email sent successfully on attempt ${attempt}`);
+      return result;
     } catch (error) {
       console.error(`Email sending failed (attempt ${attempt}/${maxRetries}):`, error.message);
 
@@ -279,7 +259,6 @@ const sendPasswordResetEmail = async (email, resetToken) => {
 };
 
 module.exports = {
-  transporter,
   sendOrderConfirmation,
   sendAdminOrderNotification,
   sendPasswordResetEmail,

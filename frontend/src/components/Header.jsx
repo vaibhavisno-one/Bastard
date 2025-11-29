@@ -121,7 +121,7 @@ const Header = () => {
         {/* Free Shipping Banner */}
         <div className="shipping-banner">
           <div className="container">
-            <p>🎉 Free Shipping Above ₹1399</p>
+            <p>🎉 Drips That Hit Different</p>
           </div>
         </div>
       </header>

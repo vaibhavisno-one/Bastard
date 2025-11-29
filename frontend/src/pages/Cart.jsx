@@ -88,11 +88,11 @@ const Cart = () => {
             </div>
             <div className="summary-row">
               <span>Shipping:</span>
-              <span>Free</span>
+              <span>₹69</span>
             </div>
             <div className="summary-row total">
               <span>Total:</span>
-              <span>₹{getCartTotal().toLocaleString('en-IN')}</span>
+              <span>₹{(getCartTotal() + 69).toLocaleString('en-IN')}</span>
             </div>
             <button className="checkout-btn" onClick={handleCheckout}>
               Proceed to Checkout
