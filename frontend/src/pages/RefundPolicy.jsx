@@ -22,7 +22,7 @@ const RefundPolicy = () => {
                     <p>We will reimburse You no later than 14 days from the day on which We receive the returned Goods. We will use the same means of payment as You used for the Order, and You will not incur any fees for such reimbursement.</p>
 
                     <h2>Cancellation Policy</h2>
-                    <p>You can cancel your order before it has been shipped. To cancel an order, please contact us immediately at support@bastardwears.com with your order details.</p>
+                    <p>You can cancel your order before it has been shipped. To cancel an order, please contact us immediately at bastardwears@gmail.com with your order details.</p>
 
                     <h2>Shipping Policy</h2>
                     <p>We ship to addresses within India. Shipping times may vary depending on your location. Standard shipping typically takes 3-7 business days.</p>

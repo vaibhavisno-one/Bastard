@@ -48,6 +48,7 @@ const sendOrderConfirmation = async (order, customerEmail) => {
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: customerEmail,
+    replyTo: process.env.EMAIL_FROM,
     subject: `Order Confirmation - #${order._id.toString().slice(-6)}`,
     html: `
       <!DOCTYPE html>
@@ -152,6 +153,34 @@ const sendOrderConfirmation = async (order, customerEmail) => {
       </body>
       </html>
     `,
+    text: `
+      Bastard - Order Confirmation
+      
+      Thank you for your order!
+      
+      Hi ${order.customerInfo.name},
+      
+      Your order has been confirmed and will be shipped soon.
+      
+      Order Details:
+      Order Number: #${order._id.toString().slice(-6)}
+      Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+      Status: ${order.status}
+      
+      Order Items:
+      ${order.products.map(item => `${item.name} - Size: ${item.size}, Qty: ${item.quantity}, Price: ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n')}
+      
+      Total: ₹${order.totalPrice.toLocaleString('en-IN')}
+      
+      Shipping Address:
+      ${order.customerInfo.name}
+      ${order.customerInfo.address.street}
+      ${order.customerInfo.address.city}, ${order.customerInfo.address.state}
+      ${order.customerInfo.address.pincode}
+      Phone: ${order.customerInfo.phone}
+      
+      If you have any questions, please contact us at bastardwears@gmail.com
+    `,
   };
 
   await sendEmailWithRetry(mailOptions);
@@ -202,6 +231,22 @@ const sendAdminOrderNotification = async (order) => {
       </body>
       </html>
     `,
+    text: `
+      New Order Received!
+      
+      Order ID: #${order._id.toString().slice(-6)}
+      Customer: ${order.customerInfo.name}
+      Phone: ${order.customerInfo.phone}
+      Total Amount: ₹${order.totalPrice.toLocaleString('en-IN')}
+      
+      Order Items:
+      ${order.products.map(item => `${item.name} - Size: ${item.size}, Qty: ${item.quantity}, Price: ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n')}
+      
+      Shipping Address:
+      ${order.customerInfo.address.street}
+      ${order.customerInfo.address.city}, ${order.customerInfo.address.state}
+      ${order.customerInfo.address.pincode}
+    `,
   };
 
   await sendEmailWithRetry(mailOptions);
@@ -214,7 +259,7 @@ const sendPasswordResetEmail = async (email, resetToken) => {
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: email,
-    subject: 'Password Reset Request - Fashion Store',
+    subject: 'Password Reset Request - Bastard',
     html: `
       <!DOCTYPE html>
       <html>
@@ -224,7 +269,7 @@ const sendPasswordResetEmail = async (email, resetToken) => {
       <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f4f4f4;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #667eea; margin: 0;">FASHION STORE</h1>
+            <h1 style="color: #667eea; margin: 0;">Bastard_Wears</h1>
           </div>
           
           <h2 style="color: #333; margin-top: 0;">Password Reset Request</h2>
@@ -252,6 +297,18 @@ const sendPasswordResetEmail = async (email, resetToken) => {
         </div>
       </body>
       </html>
+    `,
+    text: `
+      BASTARD_WEARS - Password Reset Request
+      
+      You are receiving this email because you (or someone else) has requested to reset your password.
+      
+      Please copy and paste this link into your browser to reset your password:
+      ${resetUrl}
+      
+      This link will expire in 1 hour.
+      
+      If you did not request this, please ignore this email and your password will remain unchanged.
     `,
   };
 

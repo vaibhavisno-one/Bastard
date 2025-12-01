@@ -43,7 +43,7 @@ exports.register = async (req, res, next) => {
 
     // Send token
     const token = generateToken(user._id);
-    
+
     res.status(201).json({
       success: true,
       token,
@@ -94,7 +94,7 @@ exports.login = async (req, res, next) => {
 
     // Send token
     const token = generateToken(user._id);
-    
+
     res.status(200).json({
       success: true,
       token,
@@ -127,7 +127,7 @@ exports.adminLogin = async (req, res, next) => {
 
     // Find or create admin user
     let admin = await User.findOne({ email: process.env.ADMIN_EMAIL });
-    
+
     if (!admin) {
       admin = await User.create({
         name: 'Admin',
@@ -139,7 +139,7 @@ exports.adminLogin = async (req, res, next) => {
 
     // Generate token
     const token = generateToken(admin._id);
-    
+
     res.status(200).json({
       success: true,
       token,
@@ -161,7 +161,7 @@ exports.adminLogin = async (req, res, next) => {
 exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     res.status(200).json({
       success: true,
       user: {
@@ -257,6 +257,12 @@ exports.resetPassword = async (req, res, next) => {
     res.status(200).json({
       success: true,
       token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
       message: 'Password reset successful',
     });
   } catch (error) {
@@ -271,7 +277,7 @@ exports.googleCallback = async (req, res) => {
   try {
     // User is attached to req by passport
     const token = generateToken(req.user._id);
-    
+
     // Redirect to frontend with token
     res.redirect(`${process.env.CLIENT_URL}/auth/google/success?token=${token}`);
   } catch (error) {
