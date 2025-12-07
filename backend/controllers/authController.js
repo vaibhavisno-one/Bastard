@@ -276,11 +276,18 @@ exports.resetPassword = async (req, res, next) => {
 exports.googleCallback = async (req, res) => {
   try {
     // User is attached to req by passport
+    if (!req.user) {
+      console.error('Google OAuth callback: No user attached to request');
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=google_auth_failed`);
+    }
+
+    console.log('Google OAuth successful for user:', req.user.email);
     const token = generateToken(req.user._id);
 
     // Redirect to frontend with token
     res.redirect(`${process.env.CLIENT_URL}/auth/google/success?token=${token}`);
   } catch (error) {
+    console.error('Google OAuth callback error:', error);
     res.redirect(`${process.env.CLIENT_URL}/login?error=google_auth_failed`);
   }
 };

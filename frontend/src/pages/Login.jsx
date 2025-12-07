@@ -111,6 +111,14 @@ const Login = () => {
     }
   };
 
+  // Check for Google auth errors on component mount
+  React.useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'google_auth_failed') {
+      toast.error('Google authentication failed. Please try again or use email/password.');
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

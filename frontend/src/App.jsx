@@ -17,6 +17,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
+import GoogleAuthCallback from './pages/GoogleAuthCallback';
 import './App.scss';
 import Footer from './components/Footer';
 import PaymentCallback from './pages/PaymentCallback';
@@ -60,7 +61,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:resetToken" element={<ResetPassword />} />
-                {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
+                <Route path="/auth/google/success" element={<GoogleAuthCallback />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
 
                 <Route
                   path="/checkout"

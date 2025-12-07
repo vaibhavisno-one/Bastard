@@ -26,6 +26,19 @@ const io = socketIO(server, {
 // Passport config
 require('./config/passport')(passport);
 
+// Validate Google OAuth configuration
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_CALLBACK_URL) {
+  console.warn('⚠️  WARNING: Google OAuth is not fully configured. Google login will not work.');
+  console.warn('   Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL in your .env file.');
+} else {
+  console.log('✓ Google OAuth configured');
+}
+
+// Validate session secret
+if (!process.env.SESSION_SECRET) {
+  console.warn('⚠️  WARNING: SESSION_SECRET is not set. Using default (not secure for production).');
+}
+
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
