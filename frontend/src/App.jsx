@@ -30,6 +30,7 @@ import FAQ from './pages/FAQ';
 import Team from './pages/Team';
 import NewArrivals from './pages/NewArrivals';
 import BestSellers from './pages/BestSellers';
+import Lenis from 'lenis';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -45,7 +46,34 @@ const AdminRoute = ({ children }) => {
   return user && user.isAdmin ? children : <Navigate to="/" />;
 };
 
+
+
+
 function App() {
+  React.useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
