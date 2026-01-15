@@ -66,7 +66,6 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -74,8 +73,8 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Check for user
     const user = await User.findOne({ email }).select('+password');
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -83,7 +82,6 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -92,7 +90,6 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Send token
     const token = generateToken(user._id);
 
     res.status(200).json({
@@ -102,7 +99,7 @@ exports.login = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isAdmin: user.isAdmin,
+        isAdmin: user.isAdmin === true,
       },
     });
   } catch (error) {
@@ -110,50 +107,8 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// @desc    Admin login
-// @route   POST /api/auth/admin/login
-// @access  Public
-exports.adminLogin = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
 
-    // Check against environment variables
-    if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin credentials',
-      });
-    }
 
-    // Find or create admin user
-    let admin = await User.findOne({ email: process.env.ADMIN_EMAIL });
-
-    if (!admin) {
-      admin = await User.create({
-        name: 'Admin',
-        email: process.env.ADMIN_EMAIL,
-        password: process.env.ADMIN_PASSWORD,
-        isAdmin: true,
-      });
-    }
-
-    // Generate token
-    const token = generateToken(admin._id);
-
-    res.status(200).json({
-      success: true,
-      token,
-      user: {
-        id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        isAdmin: admin.isAdmin,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 // @desc    Get current user
 // @route   GET /api/auth/me

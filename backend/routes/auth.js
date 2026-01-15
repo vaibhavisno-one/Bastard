@@ -4,7 +4,6 @@ const passport = require('passport');
 const {
   register,
   login,
-  adminLogin,
   getMe,
   forgotPassword,
   resetPassword,
@@ -14,7 +13,6 @@ const { protect } = require('../middleware/auth');
 
 router.post('/register', register);
 router.post('/login', login);
-router.post('/admin/login', adminLogin);
 router.get('/me', protect, getMe);
 
 // Password reset routes
