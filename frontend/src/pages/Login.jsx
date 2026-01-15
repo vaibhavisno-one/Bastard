@@ -123,7 +123,21 @@ const Login = () => {
     e.preventDefault();
     try {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";
-      const { data } = await API.post(endpoint, formData);
+      const { data } = await API.post(
+        endpoint,
+        {
+          email: formData.email,
+          password: formData.password,
+          ...(isLogin ? {} : { name: formData.name }),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
 
       login(data.token, data.user);
       toast.success(isLogin ? "Logged in!" : "Account created!");

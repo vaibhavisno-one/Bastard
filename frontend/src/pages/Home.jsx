@@ -125,7 +125,7 @@ const Home = () => {
       >
         <div className="container">
           <div className="section-header split">
-            <h2 className="section-title">LATEST DROPS</h2>
+            <h2 className="section-title">OUR DROPS</h2>
             <Link to="/products" className="link-arrow">
               See All Fits <FiArrowRight />
             </Link>
