@@ -20,7 +20,7 @@ const run = async () => {
         await User.create({
             name: "Admin",
             email: process.env.ADMIN_EMAIL,
-            password: process.env.ADMIN_PASSWORD, // ✅ PLAIN password
+            password: process.env.ADMIN_PASSWORD,
             isAdmin: true,
         });
 

@@ -1,12 +1,13 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const errorHandler = require('./middleware/error');
-const passport = require('passport');
-const session = require('express-session');
-const http = require('http');
-const socketIO = require('socket.io');
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const passport = require("passport");
+const session = require("express-session");
+const http = require("http");
+const socketIO = require("socket.io");
+
+const connectDB = require("./config/db");
+const errorHandler = require("./middleware/error");
 
 // Load env vars
 dotenv.config();
@@ -16,96 +17,101 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ['GET', 'POST'],
-  },
-});
 
-// Passport config
-require('./config/passport')(passport);
 
-// Validate Google OAuth configuration
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_CALLBACK_URL) {
-  console.warn('⚠️  WARNING: Google OAuth is not fully configured. Google login will not work.');
-  console.warn('   Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL in your .env file.');
-} else {
-  console.log('✓ Google OAuth configured');
-}
+const allowedOrigins = [
+  "https://bastard.fun",
+  "https://www.bastard.fun",
+  process.env.CLIENT_URL,
+];
 
-// Validate session secret
-if (!process.env.SESSION_SECRET) {
-  console.warn('⚠️  WARNING: SESSION_SECRET is not set. Using default (not secure for production).');
-}
-
-// Body parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// Enable CORS
 app.use(
   cors({
-    origin: [
-      "https://bastard.fun",
-      "https://www.bastard.fun",
-      process.env.CLIENT_URL
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 
-// Express session (for passport)
+app.options("*", cors());
+
+
+app.use(express.urlencoded({ extended: false }));
+
+
+if (!process.env.SESSION_SECRET) {
+  console.warn("⚠️ SESSION_SECRET is not set. This is unsafe for production.");
+}
+
 app.use(
   session({
+    name: "bastard.sid",
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: true,
+      sameSite: "none",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
   })
 );
 
-// Passport middleware
+
+require("./config/passport")(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Make io accessible to routes
-app.set('io', io);
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/products', require('./routes/products'));
-app.use('/api/orders', require('./routes/orders'));
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is running' });
+const io = socketIO(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
 });
 
-// Error handler
+app.set("io", io);
+
+
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/products", require("./routes/products"));
+app.use("/api/orders", require("./routes/orders"));
+app.use("/api/payments", require("./routes/payments"));
+
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ success: true, message: "Server is running" });
+});
+
+
 app.use(errorHandler);
 
-app.use('/api/payments', require('./routes/payments'));
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
 
-// Socket.IO connection
-io.on('connection', (socket) => {
-  console.log('New client connected');
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
   });
 });
 
-// Emit order updates
-const emitOrderUpdate = (order) => {
-  io.emit('orderUpdate', order);
+
+global.emitOrderUpdate = (order) => {
+  io.emit("orderUpdate", order);
 };
 
-// Make emitOrderUpdate available globally
-global.emitOrderUpdate = emitOrderUpdate;
 
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✓ Server running on port ${PORT}`);
 });
